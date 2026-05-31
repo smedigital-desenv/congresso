@@ -141,6 +141,26 @@
     .btn-confirmar-excluir{flex:1;background:var(--danger);color:#fff;border:none;border-radius:10px;padding:12px;font-size:14px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:opacity .2s;}
     .btn-confirmar-excluir:hover{opacity:.85;}
 
+    /* GERENCIAL GRUPOS */
+    .grupo-palestra{margin-bottom:10px;}
+    .grupo-header{
+      background:var(--surface);border:1px solid var(--border);
+      border-radius:var(--radius);padding:14px 18px;
+      display:flex;align-items:center;justify-content:space-between;gap:12px;
+      cursor:pointer;transition:border-color .2s,background .2s;
+      user-select:none;
+    }
+    .grupo-header:hover{border-color:var(--accent);background:var(--surface2);}
+    .grupo-header.aberto{border-radius:var(--radius) var(--radius) 0 0;border-bottom-color:transparent;border-color:var(--accent);}
+    .grupo-info{flex:1;min-width:0;}
+    .grupo-nome{font-size:14px;font-weight:600;}
+    .grupo-contagem{font-size:12px;color:var(--muted);margin-top:2px;}
+    .grupo-chevron{flex-shrink:0;width:18px;height:18px;fill:none;stroke:var(--muted);stroke-width:2;stroke-linecap:round;stroke-linejoin:round;transition:transform .2s;}
+    .grupo-header.aberto .grupo-chevron{transform:rotate(180deg);}
+    .grupo-badge{flex-shrink:0;font-size:12px;font-weight:700;padding:3px 9px;border-radius:6px;background:rgba(34,197,94,.12);color:#86efac;border:1px solid rgba(34,197,94,.2);}
+    .grupo-corpo{display:none;border:1px solid var(--accent);border-top:none;border-radius:0 0 var(--radius) var(--radius);padding:8px 12px 12px;}
+    .grupo-corpo.aberto{display:block;}
+
     @keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
     .fadeUp{animation:fadeUp .2s ease both;}
     @media(max-width:480px){.content{padding:12px;}.resumo-card .valor{font-size:22px;}.num-item .n{font-size:16px;}}
@@ -185,7 +205,13 @@
 
   <!-- TELA GERENCIAL -->
   <div id="tela-gerencial">
-    <div class="secao-titulo">Gerenciar presenças registradas</div>
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
+      <button onclick="toggleGerencial()" style="display:flex;align-items:center;gap:6px;background:var(--surface);border:1px solid var(--border);color:var(--muted);border-radius:10px;padding:8px 14px;font-size:13px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;transition:background .2s;">
+        <svg viewBox="0 0 24 24" style="width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        Voltar ao dashboard
+      </button>
+      <span style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;">Gerenciar presenças</span>
+    </div>
     <div class="gerencial-busca">
       <input class="busca-input" id="gerencialBusca" type="text" placeholder="Buscar por nome, e-mail ou token..." oninput="renderizarGerencial()"/>
     </div>
@@ -466,10 +492,9 @@
   function renderizarGerencial() {
     var busca = document.getElementById("gerencialBusca").value.trim().toLowerCase();
 
-    // Monta mapa token -> participante
     var mapPart = {};
     dadosParticipantes.forEach(function(p){ mapPart[p.token] = p; });
-    var mapPal  = {};
+    var mapPal = {};
     dadosPalestras.forEach(function(p){ mapPal[p.id] = p; });
 
     var lista = dadosPresencas.filter(function(pr) {
@@ -479,10 +504,6 @@
       return part.nome.toLowerCase().indexOf(busca) !== -1 ||
              part.email.toLowerCase().indexOf(busca) !== -1 ||
              pr.token.toLowerCase().indexOf(busca) !== -1;
-    }).sort(function(a, b) {
-      var nA = mapPart[a.token] ? mapPart[a.token].nome : a.token;
-      var nB = mapPart[b.token] ? mapPart[b.token].nome : b.token;
-      return nA.localeCompare(nB);
     });
 
     document.getElementById("topSub").textContent = lista.length + " presenca(s) registrada(s)";
@@ -493,24 +514,78 @@
       return;
     }
 
-    var html = "";
-    lista.forEach(function(pr) {
-      var part = mapPart[pr.token];
-      var pal  = mapPal[pr.palestra_id];
-      var dt   = pr.data_hora ? new Date(pr.data_hora).toLocaleString("pt-BR") : "-";
-      html +=
-        '<div class="presenca-row" id="prow-'+pr.token+'">'+
-          '<div class="presenca-info">'+
-            '<div class="presenca-nome">'+(part?part.nome:pr.token)+'</div>'+
-            '<div class="presenca-detalhe">'+(part?part.email:"")+(pal?" · "+pal.nome:"")+'</div>'+
-            '<div class="presenca-data">'+dt+(pr.validado_por?" · "+pr.validado_por:"")+'</div>'+
-          '</div>'+
-          '<button class="btn-excluir" id="excl-'+pr.token+'" onclick="pedirExclusao(\''+pr.token+'\','+(part?'\''+part.nome+'\'':'\''+pr.token+'\'')+')">' +
-            'Excluir'+
-          '</button>'+
-        '</div>';
+    // Agrupa por palestra
+    var grupos = {};
+    dadosPalestras.forEach(function(pal){ grupos[pal.id] = []; });
+    lista.forEach(function(pr){
+      if (!grupos[pr.palestra_id]) grupos[pr.palestra_id] = [];
+      grupos[pr.palestra_id].push(pr);
     });
+
+    var html = "";
+    dadosPalestras.forEach(function(pal) {
+      var gr = grupos[pal.id] || [];
+      if (gr.length === 0) return;
+
+      gr.sort(function(a, b) {
+        var nA = mapPart[a.token] ? mapPart[a.token].nome : a.token;
+        var nB = mapPart[b.token] ? mapPart[b.token].nome : b.token;
+        return nA.localeCompare(nB);
+      });
+
+      html +=
+        '<div class="grupo-palestra">' +
+          '<div class="grupo-header" id="gh-'+pal.id+'" onclick="toggleGrupo(\'' + pal.id + '\')">' +
+            '<div class="grupo-info">' +
+              '<div class="grupo-nome">'+pal.nome+'</div>' +
+              '<div class="grupo-contagem">'+gr.length+' presente(s)</div>' +
+            '</div>' +
+            '<span class="grupo-badge">'+gr.length+'</span>' +
+            '<svg class="grupo-chevron" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>' +
+          '</div>' +
+          '<div class="grupo-corpo" id="gc-'+pal.id+'">';
+
+      gr.forEach(function(pr) {
+        var part    = mapPart[pr.token];
+        var dt      = pr.data_hora ? new Date(pr.data_hora).toLocaleString("pt-BR") : "-";
+        var nome    = part ? part.nome : pr.token;
+        var nomeEsc = nome.replace(/'/g, "\\'");
+        html +=
+          '<div class="presenca-row" id="prow-'+pr.token+'">' +
+            '<div class="presenca-info">' +
+              '<div class="presenca-nome">'+nome+'</div>' +
+              '<div class="presenca-detalhe">'+(part?part.email:"")+'</div>' +
+              '<div class="presenca-data">'+dt+(pr.validado_por?" · "+pr.validado_por:"")+'</div>' +
+            '</div>' +
+            '<button class="btn-excluir" onclick="pedirExclusao(\'' + pr.token + '\',\'' + (part ? part.nome.replace(/'/g,"\\'") : pr.token) + '\')">Excluir</button>' +
+          '</div>';
+      });
+
+      html += '</div></div>';
+    });
+
     document.getElementById("gerencialLista").innerHTML = html;
+
+    if (busca) {
+      dadosPalestras.forEach(function(pal) {
+        if (grupos[pal.id] && grupos[pal.id].length > 0) toggleGrupo(pal.id, true);
+      });
+    }
+  }
+
+  function toggleGrupo(palestraId, forcarAberto) {
+    var header = document.getElementById("gh-"+palestraId);
+    var corpo  = document.getElementById("gc-"+palestraId);
+    if (!header || !corpo) return;
+    var estaAberto = corpo.classList.contains("aberto");
+    if (forcarAberto && estaAberto) return;
+    if (estaAberto && !forcarAberto) {
+      corpo.classList.remove("aberto");
+      header.classList.remove("aberto");
+    } else {
+      corpo.classList.add("aberto");
+      header.classList.add("aberto");
+    }
   }
 
   // ── EXCLUSÃO ────────────────────────────────────────────────
