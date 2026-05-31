@@ -189,12 +189,13 @@
       html +=     '<div class="fiscal-email">' + f.email + '</div>';
       html +=   '</div>';
 
-      html += '<select class="select-perfil" data-idx="' + idx + '" onchange="alterarPerfilIdx(this)"';
-      if (ehEuMesmo) html += ' disabled';
-      html += '>';
-      html += '<option value="fiscal"'  + (isGerente ? '' : ' selected') + '>Fiscal</option>';
-      html += '<option value="gerente"' + (isGerente ? ' selected' : '') + '>Gerente</option>';
-      html += '</select>';
+      var selDisabled = ehEuMesmo ? " disabled" : "";
+      var selFiscal   = isGerente ? "" : " selected";
+      var selGerente  = isGerente ? " selected" : "";
+      html += "<select class=\"select-perfil\" data-idx=\"" + idx + "\" onchange=\"alterarPerfilIdx(this)\"" + selDisabled + ">";
+      html += "<option value=\"fiscal\"" + selFiscal + ">Fiscal</option>";
+      html += "<option value=\"gerente\"" + selGerente + ">Gerente</option>";
+      html += "</select>";
 
       html += '<div class="fiscal-acoes">';
       html += '<button class="btn-sm btn-remover" data-idx="' + idx + '" onclick="pedirRemocaoIdx(this)"';
