@@ -1,1 +1,0 @@
-# smedigital-desenv.github.io
