@@ -221,9 +221,9 @@
       atualizado_em: new Date().toISOString()
     };
 
-    // Upsert (insert ou update na mesma linha id=1)
-    fetch(SUPA_URL + "/email_config?on_conflict=id", {
-      method:  "POST",
+    // Upsert: tenta atualizar primeiro, se não existir insere
+    fetch(SUPA_URL + "/email_config?id=eq.1", {
+      method:  "PATCH",
       headers: h(),
       body:    JSON.stringify(payload)
     })
