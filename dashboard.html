@@ -745,7 +745,7 @@
   }
 
   function renderizarEmails() {
-    var busca = document.getElementById('emailsBusca').value.trim().toLowerCase();
+    var busca = document.getElementById("emailsBusca").value.trim().toLowerCase();
 
     var lista = dadosEmails.filter(function(pr) {
       if (filtroEmail === "enviados"  && !pr.email_enviado) return false;
@@ -781,16 +781,17 @@
       var dt       = pr.data_hora ? new Date(pr.data_hora).toLocaleString("pt-BR") : "-";
       var enviado  = pr.email_enviado;
 
-      html += "<div class="email-row " + (enviado ? "enviado" : "pendente") + "">";
-      html +=   "<div class="email-info">";
-      html +=     "<div class="email-nome">" + nome + "</div>";
-      html +=     "<div class="email-detalhe">" + email + " &middot; " + palestra + "</div>";
-      html +=     "<div class="email-detalhe" style="margin-top:2px;font-size:11px;color:var(--muted)">Presença: " + dt + "</div>";
-      html +=   "</div>";
+      var classeRow = "email-row " + (enviado ? "enviado" : "pendente");
+      html += '<div class="' + classeRow + '">';
+      html +=   '<div class="email-info">';
+      html +=     '<div class="email-nome">' + nome + '</div>';
+      html +=     '<div class="email-detalhe">' + email + ' &middot; ' + palestra + '</div>';
+      html +=     '<div class="email-detalhe" style="margin-top:2px;font-size:11px;color:var(--muted)">Presenca: ' + dt + '</div>';
+      html +=   '</div>';
       html +=   (enviado
-        ? "<span class="tag-enviado">&#10003; Enviado</span>"
-        : "<span class="tag-pendente">Pendente</span>");
-      html += "</div>";
+        ? '<span class="tag-enviado">&#10003; Enviado</span>'
+        : '<span class="tag-pendente">Pendente</span>');
+      html += '</div>';
     });
 
     document.getElementById("emailsLista").innerHTML = html;
