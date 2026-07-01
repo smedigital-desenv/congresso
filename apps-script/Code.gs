@@ -100,27 +100,40 @@ function json(obj) {
 function supaFetch(path, method, body) {
 
   var key = supaKey();
+
+  // Prefer: para POST devolve a representação; se a URL usa on_conflict,
+  // ativa o upsert real (senão o PostgREST retorna 409 em conflito).
+  var prefer = "";
+  if (method === "POST") {
+    prefer = "return=representation";
+    if (path.indexOf("on_conflict") !== -1) prefer += ",resolution=merge-duplicates";
+  }
+
   var options = {
     method:  method || "GET",
     headers: {
       "apikey":        key,
       "Authorization": "Bearer " + key,
       "Content-Type":  "application/json",
-      "Prefer":        method === "POST" ? "return=representation" : ""
+      "Prefer":        prefer
     },
     muteHttpExceptions: true
   };
 
   if (body) options.payload = JSON.stringify(body);
 
-  var response = UrlFetchApp.fetch(
-    SUPABASE_URL + "/rest/v1/" + path,
-    options
-  );
-
+  var response = UrlFetchApp.fetch(SUPABASE_URL + "/rest/v1/" + path, options);
+  var code = response.getResponseCode();
   var text = response.getContentText();
-  if (!text || text.trim() === "") return {};
-  return JSON.parse(text);
+  var data = (text && text.trim() !== "") ? JSON.parse(text) : {};
+
+  // Erro real do PostgREST: devolve { error } para os chamadores detectarem
+  // (antes, o erro vinha como {code,message} e o "if (res.error)" nunca pegava).
+  if (code >= 400) {
+    Logger.log("supaFetch " + method + " " + path + " -> " + code + " " + text);
+    return { error: data, status: code };
+  }
+  return data;
 
 }
 
@@ -281,8 +294,10 @@ function enviarEmailsConfirmacao() {
     }
     var config = configResp[0];
 
+    // Inclui email_enviado NULL além de false (caso a coluna não tenha
+    // default false, presenças novas ficariam NULL e nunca receberiam e-mail).
     var presencas = supaFetch(
-      "presencas?email_enviado=eq.false" +
+      "presencas?or=(email_enviado.is.null,email_enviado.eq.false)" +
       "&select=token,palestra_id,data_hora,validado_por," +
       "participantes(nome,email),palestras(nome)",
       "GET", null
