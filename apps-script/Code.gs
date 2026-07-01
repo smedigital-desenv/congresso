@@ -504,6 +504,10 @@ function onOpen() {
     .addItem("Enviar emails pendentes agora",           "enviarEmailsConfirmacao")
     .addItem("Configurar envio automatico (1x/hora)",  "configurarGatilhoEmail")
 
+    .addSeparator()
+    .addItem("Enviar QR Codes pendentes",              "enviarQRCodesPendentes")
+    .addItem("Configurar envio de QR (1x/hora)",       "configurarGatilhoQR")
+
     .addToUi();
 
 }
