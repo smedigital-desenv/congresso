@@ -23,7 +23,13 @@
   // Cliente único de auth (mantém a sessão no localStorage e processa o
   // retorno do OAuth automaticamente ao carregar a página).
   window.sb = window.supabase.createClient(SUPA_PROJECT_URL, SUPA_KEY, {
-    auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
+    auth: {
+      persistSession:     true,
+      autoRefreshToken:   true,
+      detectSessionInUrl: true,
+      flowType:           "pkce",
+      storage:            window.localStorage
+    }
   });
 
   function limparCache() {
@@ -57,6 +63,7 @@
   function carregarSessao() {
     return sb.auth.getSession().then(function(res) {
       var session = res && res.data ? res.data.session : null;
+      console.log("[auth] getSession ->", session ? ("sessao de " + session.user.email) : "NENHUMA sessao no storage");
       if (!session || !session.user || !session.user.email) { return null; }
 
       var email = session.user.email.toLowerCase();
@@ -78,6 +85,7 @@
         var v = data[0];
         // Normaliza o perfil (ex.: "Gerente"/" GERENTE " -> "gerente")
         var perfil = (v.perfil || "fiscal").toString().trim().toLowerCase();
+        console.log("[auth] allowlist OK ->", v.email, "perfil:", perfil);
         localStorage.setItem(KEY_EMAIL,  v.email);
         localStorage.setItem(KEY_PERFIL, perfil);
         localStorage.setItem(KEY_NOME,   v.nome || "");
