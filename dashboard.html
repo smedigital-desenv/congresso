@@ -195,6 +195,7 @@
 <!-- TOPBAR -->
 <!-- topbar removida: navegação feita pelo menu global -->
 
+<script src="config.js"></script>
 <script src="menu.js"></script>
 <div class="content">
 
@@ -335,8 +336,7 @@
 </div>
 
 <script>
-  var SUPA_URL  = "https://kormvmwdkyssxhdkgthd.supabase.co/rest/v1";
-  var SUPA_KEY  = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imtvcm12bXdka3lzc3hoZGtndGhkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAxNDU3MDAsImV4cCI6MjA5NTcyMTcwMH0._x3hrly1GYE4CNj8xZllQHoFqbgt5Bwrj2T9clMx0ls";
+  // SUPA_URL / SUPA_KEY definidos em config.js
   var KEY_EMAIL = "fiscal_email";
 
   function h(extra) {
@@ -359,8 +359,8 @@
     document.getElementById("btnRefresh").classList.add("loading");
     return Promise.all([
       fetch(SUPA_URL + "/palestras?select=id,nome,carga_horaria&order=nome", { headers: h() }).then(function(r){ return r.json(); }),
-      fetch(SUPA_URL + "/participantes?select=token,nome,email,palestra_id", { headers: h() }).then(function(r){ return r.json(); }),
-      fetch(SUPA_URL + "/presencas?select=token,palestra_id,data_hora,validado_por", { headers: h() }).then(function(r){ return r.json(); })
+      fetchAll(SUPA_URL + "/participantes?select=token,nome,email,palestra_id", h()),
+      fetchAll(SUPA_URL + "/presencas?select=token,palestra_id,data_hora,validado_por", h())
     ]).then(function(res) {
       document.getElementById("btnRefresh").classList.remove("loading");
       dadosPalestras     = Array.isArray(res[0]) ? res[0] : [];
@@ -417,7 +417,7 @@
       var tc = d.taxa>=75?"taxa-alta":d.taxa>=40?"taxa-media":"taxa-baixa";
       html +=
         '<div class="palestra-card fadeUp" style="animation-delay:'+(idx*.04)+'s" onclick="abrirModal(\''+d.pal.id+'\')">' +
-          '<div class="palestra-header"><div><div class="palestra-nome">'+d.pal.nome+'</div>'+(d.pal.carga_horaria?'<div class="palestra-carga">'+d.pal.carga_horaria+'</div>':'')+'</div><span class="taxa-badge '+tc+'">'+d.taxa+'%</span></div>'+
+          '<div class="palestra-header"><div><div class="palestra-nome">'+escapeHtml(d.pal.nome)+'</div>'+(d.pal.carga_horaria?'<div class="palestra-carga">'+escapeHtml(d.pal.carga_horaria)+'</div>':'')+'</div><span class="taxa-badge '+tc+'">'+d.taxa+'%</span></div>'+
           '<div class="barra-bg"><div class="barra-fill" style="width:'+d.taxa+'%"></div></div>'+
           '<div class="palestra-nums">'+
             '<div class="num-item"><div class="n n-inscritos">'+d.ins+'</div><div class="l">Inscritos</div></div>'+
@@ -502,9 +502,9 @@
       html +=
         '<div class="participante-row '+(pr?"presente":"ausente")+'" id="row-'+p.token+'">'+
           '<div class="participante-info">'+
-            '<div class="participante-nome">'+p.nome+'</div>'+
-            '<div class="participante-email">'+p.email+'</div>'+
-            (pr?'<div class="participante-meta">'+dt+(por?" · "+por:"")+'</div>':'')+
+            '<div class="participante-nome">'+escapeHtml(p.nome)+'</div>'+
+            '<div class="participante-email">'+escapeHtml(p.email)+'</div>'+
+            (pr?'<div class="participante-meta">'+dt+(por?" · "+escapeHtml(por):"")+'</div>':'')+
           '</div>'+
           (pr
             ? '<span class="tag-presente">Presente</span>'
@@ -610,7 +610,7 @@
         '<div class="grupo-palestra">' +
           '<div class="grupo-header" id="gh-'+pal.id+'" onclick="toggleGrupo(\'' + pal.id + '\')">' +
             '<div class="grupo-info">' +
-              '<div class="grupo-nome">'+pal.nome+'</div>' +
+              '<div class="grupo-nome">'+escapeHtml(pal.nome)+'</div>' +
               '<div class="grupo-contagem">'+gr.length+' presente(s)</div>' +
             '</div>' +
             '<span class="grupo-badge">'+gr.length+'</span>' +
@@ -626,9 +626,9 @@
         html +=
           '<div class="presenca-row" id="prow-'+pr.token+'">' +
             '<div class="presenca-info">' +
-              '<div class="presenca-nome">'+nome+'</div>' +
-              '<div class="presenca-detalhe">'+(part?part.email:"")+'</div>' +
-              '<div class="presenca-data">'+dt+(pr.validado_por?" · "+pr.validado_por:"")+'</div>' +
+              '<div class="presenca-nome">'+escapeHtml(nome)+'</div>' +
+              '<div class="presenca-detalhe">'+(part?escapeHtml(part.email):"")+'</div>' +
+              '<div class="presenca-data">'+dt+(pr.validado_por?" · "+escapeHtml(pr.validado_por):"")+'</div>' +
             '</div>' +
             '<button class="btn-excluir" onclick="pedirExclusao(\'' + pr.token + '\',\'' + (part ? part.nome.replace(/'/g,"\\'") : pr.token) + '\')">Excluir</button>' +
           '</div>';
@@ -672,15 +672,6 @@
   function fecharConfirm() {
     tokenParaExcluir = null;
     document.getElementById("confirmOverlay").classList.remove("aberto");
-  }
-
-  function pedirExclusaoInline(btn) {
-    var token = btn.getAttribute("data-token");
-    var nome  = btn.getAttribute("data-nome");
-    tokenParaExcluir = token;
-    document.getElementById("confirmMsg").textContent =
-      "Excluir a presenca de " + nome + "? Esta acao nao pode ser desfeita.";
-    document.getElementById("confirmOverlay").classList.add("aberto");
   }
 
   function confirmarExclusao() {
@@ -746,9 +737,8 @@
     document.getElementById("emailsLista").innerHTML =
       '<div class="estado"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>Carregando...</div>';
 
-    fetch(SUPA_URL + "/presencas?select=token,email_enviado,data_hora,validado_por,participantes(nome,email),palestras(nome)&order=email_enviado.asc,data_hora.desc",
-      { headers: h() })
-      .then(function(r){ return r.json(); })
+    fetchAll(SUPA_URL + "/presencas?select=token,email_enviado,data_hora,validado_por,participantes(nome,email),palestras(nome)&order=email_enviado.asc,data_hora.desc",
+      h())
       .then(function(data) {
         dadosEmails = Array.isArray(data) ? data : [];
         renderizarEmails();
@@ -806,8 +796,8 @@
       var classeRow = "email-row " + (enviado ? "enviado" : "pendente");
       html += '<div class="' + classeRow + '">';
       html +=   '<div class="email-info">';
-      html +=     '<div class="email-nome">' + nome + '</div>';
-      html +=     '<div class="email-detalhe">' + email + ' &middot; ' + palestra + '</div>';
+      html +=     '<div class="email-nome">' + escapeHtml(nome) + '</div>';
+      html +=     '<div class="email-detalhe">' + escapeHtml(email) + ' &middot; ' + escapeHtml(palestra) + '</div>';
       html +=     '<div class="email-detalhe" style="margin-top:2px;font-size:11px;color:var(--muted)">Presenca: ' + dt + '</div>';
       html +=   '</div>';
       html +=   (enviado
@@ -820,7 +810,7 @@
   }
 
   // ── ACOES RAPIDAS ──────────────────────────────────────────
-  var APPS_URL = "https://script.google.com/macros/s/AKfycbwgn-kasXrfTWULBUe_7chco-O9TUFjFLVtXqkfyBs8WuGHKDLX8hhiENd2r-bly6-E0A/exec";
+  // APPS_URL definido em config.js
 
   function chamarAppsScript(action, btnId, onSucesso) {
     var btn = document.getElementById(btnId);

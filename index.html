@@ -47,6 +47,7 @@
   </style>
 </head>
 <body>
+<script src="config.js"></script>
 <script src="menu.js"></script>
 <div class="container">
   <div class="logo">
@@ -85,8 +86,7 @@
 </div>
 
 <script>
-  var SUPA_URL = "https://kormvmwdkyssxhdkgthd.supabase.co/rest/v1";
-  var SUPA_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imtvcm12bXdka3lzc3hoZGtndGhkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAxNDU3MDAsImV4cCI6MjA5NTcyMTcwMH0._x3hrly1GYE4CNj8xZllQHoFqbgt5Bwrj2T9clMx0ls";
+  // SUPA_URL / SUPA_KEY definidos em config.js
   var KEY_EMAIL    = "fiscal_email";
   var KEY_CACHE    = "participantes_cache";
   var KEY_CACHE_DT = "participantes_cache_data";
@@ -141,8 +141,7 @@
     if (cacheValido()) { if (callback) callback(totalCache()); return; }
     var st = document.getElementById("cacheStatus");
     st.innerHTML = "Carregando participantes...";
-    fetch(SUPA_URL + "/participantes?select=token,nome,email,palestra_id,qr_url,palestras(nome)&order=token", { headers: supaHeaders() })
-      .then(function(r){ return r.json(); })
+    fetchAll(SUPA_URL + "/participantes?select=token,nome,email,palestra_id,qr_url,palestras(nome)&order=token", supaHeaders())
       .then(function(data) {
         if (Array.isArray(data)) {
           // Normaliza palestraNome

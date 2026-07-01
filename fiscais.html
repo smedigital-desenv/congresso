@@ -169,11 +169,11 @@
   </div>
 </div>
 
+<script src="config.js"></script>
 <script src="menu.js"></script>
 
 <script>
-  var SUPA_URL   = "https://kormvmwdkyssxhdkgthd.supabase.co/rest/v1";
-  var SUPA_KEY   = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imtvcm12bXdka3lzc3hoZGtndGhkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAxNDU3MDAsImV4cCI6MjA5NTcyMTcwMH0._x3hrly1GYE4CNj8xZllQHoFqbgt5Bwrj2T9clMx0ls";
+  // SUPA_URL / SUPA_KEY definidos em config.js
   var KEY_PERFIL = "fiscal_perfil";
 
   function h() { return {"apikey":SUPA_KEY,"Authorization":"Bearer "+SUPA_KEY,"Content-Type":"application/json","Prefer":"return=representation"}; }
@@ -215,14 +215,14 @@
     _lista.forEach(function(f, idx) {
       var isGerente = f.perfil === "gerente";
       var ehEuMesmo = f.email === emailLogado;
-      var nome      = f.nome || "Sem nome";
+      var nome      = escapeHtml(f.nome || "Sem nome");
 
       html += "<div class=\"fiscal-row\">";
       html +=   "<div class=\"fiscal-info\">";
       html +=     "<div class=\"fiscal-nome\">" + nome;
       if (ehEuMesmo) html += " <span style=\"font-size:10px;color:var(--muted)\">(voce)</span>";
       html +=     "</div>";
-      html +=     "<div class=\"fiscal-email\">" + f.email + "</div>";
+      html +=     "<div class=\"fiscal-email\">" + escapeHtml(f.email) + "</div>";
       html +=   "</div>";
 
       // Badge de perfil

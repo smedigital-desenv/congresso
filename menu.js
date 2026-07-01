@@ -5,8 +5,7 @@
  */
 (function() {
 
-  var SUPA_URL  = "https://kormvmwdkyssxhdkgthd.supabase.co/rest/v1";
-  var SUPA_KEY  = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imtvcm12bXdka3lzc3hoZGtndGhkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAxNDU3MDAsImV4cCI6MjA5NTcyMTcwMH0._x3hrly1GYE4CNj8xZllQHoFqbgt5Bwrj2T9clMx0ls";
+  // SUPA_URL e SUPA_KEY vêm de config.js (carregado antes deste script).
   var KEY_EMAIL  = "fiscal_email";
   var KEY_PERFIL = "fiscal_perfil";
   var KEY_NOME   = "fiscal_nome";
