@@ -61,6 +61,7 @@
   </style>
 </head>
 <body>
+<script src="config.js"></script>
 <script src="menu.js"></script>
 <div class="topbar">
   <h1>Configurar E-mail de Confirmacao</h1>
@@ -143,8 +144,7 @@
 <div class="toast" id="toast"></div>
 
 <script>
-  var SUPA_URL = "https://kormvmwdkyssxhdkgthd.supabase.co/rest/v1";
-  var SUPA_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imtvcm12bXdka3lzc3hoZGtndGhkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAxNDU3MDAsImV4cCI6MjA5NTcyMTcwMH0._x3hrly1GYE4CNj8xZllQHoFqbgt5Bwrj2T9clMx0ls";
+  // SUPA_URL / SUPA_KEY definidos em config.js
 
   function h() { return { "apikey": SUPA_KEY, "Authorization": "Bearer " + SUPA_KEY, "Content-Type": "application/json", "Prefer": "return=representation" }; }
 
@@ -221,10 +221,13 @@
       atualizado_em: new Date().toISOString()
     };
 
-    // Upsert: tenta atualizar primeiro, se não existir insere
-    fetch(SUPA_URL + "/email_config?id=eq.1", {
-      method:  "PATCH",
-      headers: h(),
+    // Upsert real: insere ou atualiza a linha id=1 numa única requisição.
+    // (o PATCH anterior não criava a linha no primeiro salvamento)
+    var headersUpsert = h();
+    headersUpsert["Prefer"] = "return=representation,resolution=merge-duplicates";
+    fetch(SUPA_URL + "/email_config", {
+      method:  "POST",
+      headers: headersUpsert,
       body:    JSON.stringify(payload)
     })
     .then(function(r) {
