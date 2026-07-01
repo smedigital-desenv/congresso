@@ -106,19 +106,65 @@ Antes, a URL `.../exec?action=enviarEmails` era pública: qualquer um disparava
 
 ---
 
-## 3. Login sem verificação de identidade
+## 3. Login com identidade (✅ implementado — login com Google)
 
-`index.html` autentica só verificando se o e-mail existe em `validadores` — não há senha
-nem confirmação de posse do e-mail, e o perfil de gerente é lido de `localStorage`
-(`fiscal_perfil`), trivialmente forjável no DevTools.
+Antes, `index.html` autenticava só verificando se o e-mail existia em `validadores` —
+sem senha, sem prova de posse, e o perfil vinha do `localStorage` (forjável).
 
-Resolvido junto com o item 1 ao adotar **Supabase Auth (magic link)**: o perfil passa a vir
-do JWT/servidor, não do `localStorage`.
+Agora o login usa **Supabase Auth com Google** (`auth.js`): o Google prova a posse do
+e-mail, e o acesso só é liberado se esse e-mail estiver em `validadores` (allowlist). O
+perfil (fiscal/gerente) vem de `validadores` a cada carregamento, validado por `protegerPagina()`.
+Setup em [docs/login-google.md](docs/login-google.md).
+
+> Ainda falta o item 1 (RLS): a sessão já é real, mas as tabelas continuam abertas ao
+> `anon` até você aplicar as policies abaixo. Com o login pronto, dá para amarrar o RLS à
+> identidade (`auth.jwt() ->> 'email'`).
+
+### Policies de RLS recomendadas (agora que há sessão real)
+```sql
+-- Helper: e-mail do usuario autenticado
+-- (auth.jwt() ->> 'email')
+
+-- validadores: cada usuario autenticado le a lista (para checar allowlist/perfil).
+alter table validadores enable row level security;
+create policy validadores_sel on validadores for select to authenticated using (true);
+-- Escrita (gerenciar fiscais) apenas para gerentes:
+create policy validadores_ins on validadores for insert to authenticated
+  with check (exists (select 1 from validadores v where v.email = auth.jwt()->>'email' and v.perfil = 'gerente'));
+create policy validadores_upd on validadores for update to authenticated
+  using (exists (select 1 from validadores v where v.email = auth.jwt()->>'email' and v.perfil = 'gerente'));
+create policy validadores_del on validadores for delete to authenticated
+  using (exists (select 1 from validadores v where v.email = auth.jwt()->>'email' and v.perfil = 'gerente'));
+
+-- participantes: leitura só para fiscais/gerentes autenticados (dashboard/cache).
+alter table participantes enable row level security;
+create policy participantes_sel on participantes for select to authenticated
+  using (exists (select 1 from validadores v where v.email = auth.jwt()->>'email'));
+-- (a consulta publica de inscricao continua pela funcao consultar_inscricao — item 1)
+
+-- presencas: fiscais/gerentes autenticados podem ler e inserir; excluir só gerente.
+alter table presencas enable row level security;
+create policy presencas_sel on presencas for select to authenticated
+  using (exists (select 1 from validadores v where v.email = auth.jwt()->>'email'));
+create policy presencas_ins on presencas for insert to authenticated
+  with check (exists (select 1 from validadores v where v.email = auth.jwt()->>'email'));
+create policy presencas_del on presencas for delete to authenticated
+  using (exists (select 1 from validadores v where v.email = auth.jwt()->>'email' and v.perfil = 'gerente'));
+
+-- email_config: leitura autenticada; escrita só gerente.
+alter table email_config enable row level security;
+create policy email_config_sel on email_config for select to authenticated using (true);
+create policy email_config_wr on email_config for all to authenticated
+  using (exists (select 1 from validadores v where v.email = auth.jwt()->>'email' and v.perfil = 'gerente'))
+  with check (exists (select 1 from validadores v where v.email = auth.jwt()->>'email' and v.perfil = 'gerente'));
+```
+> O Apps Script usa a `service_role`, que **ignora o RLS** — o envio de e-mails e o sync
+> continuam funcionando normalmente após aplicar essas policies.
 
 ---
 
 ## Prioridade sugerida
-1. RLS em `participantes`/`presencas`/`validadores`/`email_config` (item 1) — **agora**.
-2. Constraint `UNIQUE` em `presencas`.
-3. Segredo no Apps Script (item 2).
-4. Migração para Supabase Auth (itens 1 e 3) — quando possível.
+1. ✅ Login com Google (item 3).
+2. Aplicar as **policies de RLS** acima (item 1/3) — **agora**, para fechar o acesso `anon`.
+3. Constraint `UNIQUE` em `presencas` + função `consultar_inscricao` (item 1).
+4. `service_role` + validação de gerente no Apps Script (item 2).

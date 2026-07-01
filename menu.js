@@ -100,32 +100,13 @@
 
   }
 
-  // Logout global
+  // Logout global — usa a sessão Supabase (auth.js) quando disponível
   window.menuLogout = function() {
+    if (typeof window.logoutAuth === "function") { window.logoutAuth(); return; }
     localStorage.removeItem(KEY_EMAIL);
     localStorage.removeItem(KEY_PERFIL);
     localStorage.removeItem(KEY_NOME);
     window.location.href = "index.html";
-  };
-
-  // Verifica perfil no Supabase e salva no localStorage
-  // Chamado pelo index.html após o login
-  window.verificarECarregarPerfil = function(email, callback) {
-    fetch(SUPA_URL + "/validadores?email=eq." + encodeURIComponent(email) + "&select=email,nome,perfil&limit=1",
-      { headers: { "apikey": SUPA_KEY, "Authorization": "Bearer " + SUPA_KEY } }
-    )
-    .then(function(r){ return r.json(); })
-    .then(function(data) {
-      if (data && data.length > 0) {
-        localStorage.setItem(KEY_EMAIL,  data[0].email);
-        localStorage.setItem(KEY_PERFIL, data[0].perfil || "fiscal");
-        localStorage.setItem(KEY_NOME,   data[0].nome   || "");
-        if (callback) callback(true, data[0]);
-      } else {
-        if (callback) callback(false, null);
-      }
-    })
-    .catch(function(){ if (callback) callback(false, null); });
   };
 
   // Renderiza assim que o body estiver disponível

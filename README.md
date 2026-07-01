@@ -15,7 +15,8 @@ geração de QR Codes e envio de e-mails.
 ├── fiscais.html        Gerente gerencia fiscais (CRUD) — só perfil "gerente"
 ├── email-config.html   Editor do template de e-mail de confirmação
 ├── config.js           Config central (Supabase/Apps Script) + utilitários
-├── menu.js             Menu de navegação global + verificação de perfil
+├── auth.js             Login com Google (Supabase Auth) + allowlist + guarda de sessão
+├── menu.js             Menu de navegação global + logout
 ├── apps-script/
 │   └── Code.gs         Web App + migração + sync + envio de e-mails
 ├── SECURITY.md         Pendências de segurança (RLS, Apps Script, login)
@@ -30,7 +31,11 @@ geração de QR Codes e envio de e-mails.
 - **fiscal** — valida presenças (index → validar).
 - **gerente** — tudo do fiscal + dashboard de gestão, fiscais e config de e-mail.
 
-Perfil e sessão ficam em `localStorage` (`fiscal_email`, `fiscal_perfil`, `fiscal_nome`).
+## Login
+Login via **Google (Supabase Auth)**. Só entra quem estiver na tabela `validadores`
+(allowlist); o perfil (fiscal/gerente) vem de lá. A sessão é do Supabase; o `localStorage`
+(`fiscal_email`/`fiscal_perfil`/`fiscal_nome`) é só um cache. Guarda de página em
+`auth.js` (`protegerPagina()`). Setup: [docs/login-google.md](docs/login-google.md).
 
 ## Configuração
 `SUPA_URL` / `SUPA_KEY` (chave **anon**, pública) e `APPS_URL` ficam em
