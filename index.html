@@ -47,7 +47,9 @@
   </style>
 </head>
 <body>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="config.js"></script>
+<script src="auth.js"></script>
 <script src="menu.js"></script>
 <div class="container">
   <div class="logo">
@@ -64,9 +66,8 @@
   </div>
 
   <div class="card" id="etapa-login">
-    <label for="inputEmail">E-mail institucional</label>
-    <input type="email" id="inputEmail" placeholder="fiscal@exemplo.com" autocomplete="email"/>
-    <button class="btn btn-primary" id="btnEntrar" onclick="entrar()">Entrar</button>
+    <label>Acesso restrito a fiscais autorizados</label>
+    <button class="btn btn-primary" id="btnEntrar" onclick="entrarComGoogle()">Entrar com Google</button>
     <div class="msg" id="msgLogin"></div>
   </div>
 
@@ -102,26 +103,33 @@
   function totalCache() { try { return JSON.parse(localStorage.getItem(KEY_CACHE)||"[]").length; } catch(e){ return 0; } }
 
   window.onload = function() {
-    var emailSalvo = localStorage.getItem(KEY_EMAIL);
-    if (emailSalvo) iniciarSessao(emailSalvo);
+    var msg = document.getElementById("msgLogin");
+
+    // Mensagem quando o Google autenticou mas o e-mail nao esta na allowlist
+    if (new URLSearchParams(window.location.search).get("erro") === "nao_autorizado") {
+      msg.className = "msg erro";
+      msg.innerHTML = "E-mail nao autorizado. Fale com o gerente do evento.";
+    }
+
+    // Verifica se ja ha sessao Google valida + autorizada
+    verificarSessao().then(function(user) {
+      if (user && user.email) {
+        iniciarSessao(user.email, user.nome || "");
+      } else if (user && user.naoAutorizado) {
+        msg.className = "msg erro";
+        msg.innerHTML = "E-mail nao autorizado. Fale com o gerente do evento.";
+      }
+    });
   };
 
-  function entrar() {
-    var email = document.getElementById("inputEmail").value.trim().toLowerCase();
-    var msg   = document.getElementById("msgLogin");
-    var btn   = document.getElementById("btnEntrar");
-    if (!email) { msg.className="msg erro"; msg.innerHTML="Informe seu e-mail."; return; }
-
-    btn.disabled=true; btn.textContent="Verificando...";
-    msg.className="msg info"; msg.innerHTML="Verificando autorizacao...";
-
-    verificarECarregarPerfil(email, function(autorizado, dados) {
-      if (autorizado) {
-        iniciarSessao(dados.email, dados.nome || "");
-      } else {
-        msg.className="msg erro"; msg.innerHTML="E-mail nao autorizado.";
-        btn.disabled=false; btn.textContent="Entrar";
-      }
+  function entrarComGoogle() {
+    var btn = document.getElementById("btnEntrar");
+    var msg = document.getElementById("msgLogin");
+    btn.disabled = true; btn.textContent = "Redirecionando...";
+    msg.className = "msg info"; msg.innerHTML = "Abrindo login do Google...";
+    loginGoogle().catch(function() {
+      btn.disabled = false; btn.textContent = "Entrar com Google";
+      msg.className = "msg erro"; msg.innerHTML = "Nao foi possivel iniciar o login.";
     });
   }
 
@@ -200,18 +208,10 @@
   }
 
   function logout() {
-    localStorage.removeItem(KEY_EMAIL);
     if (html5QrCode) { html5QrCode.stop().catch(function(){}); html5QrCode=null; }
-    document.getElementById("fiscal-bar").style.display  = "none";
-    document.getElementById("etapa-token").style.display = "none";
-    document.getElementById("etapa-login").style.display = "block";
-    document.getElementById("inputEmail").value="";
-    document.getElementById("btnEntrar").disabled=false;
-    document.getElementById("btnEntrar").textContent="Entrar";
-    document.getElementById("msgLogin").className="msg";
+    logoutAuth();  // encerra a sessao Google e volta ao login
   }
 
-  document.getElementById("inputEmail").addEventListener("keydown", function(e){ if(e.key==="Enter") entrar(); });
   document.getElementById("inputToken").addEventListener("keydown", function(e){ if(e.key==="Enter") irParaValidar(); });
 </script>
 </body>
