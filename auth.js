@@ -65,9 +65,11 @@
         SUPA_URL + "/validadores?email=eq." + encodeURIComponent(email) + "&select=email,nome,perfil&limit=1",
         { headers: { "apikey": SUPA_KEY, "Authorization": "Bearer " + session.access_token } }
       )
-      .then(function(r){ return r.json(); })
+      .then(function(r){ if (!r.ok) throw new Error("http " + r.status); return r.json(); })
       .then(function(data) {
-        if (!Array.isArray(data) || data.length === 0) {
+        if (!Array.isArray(data)) throw new Error("resposta inesperada");
+        if (data.length === 0) {
+          // Confirmado que o e-mail NÃO está na allowlist -> encerra a sessão.
           return sb.auth.signOut().catch(function(){}).then(function(){
             limparCache();
             return { naoAutorizado: true, email: email };
@@ -80,6 +82,18 @@
         localStorage.setItem(KEY_PERFIL, perfil);
         localStorage.setItem(KEY_NOME,   v.nome || "");
         return { email: v.email, perfil: perfil, nome: v.nome || "" };
+      })
+      .catch(function() {
+        // Erro TRANSITÓRIO ao checar a allowlist (rede, etc.): NÃO desloga.
+        // Mantém a sessão e usa o perfil em cache, se houver. Assim um F5 não
+        // exige novo login por causa de uma falha momentânea na consulta.
+        var cachedEmail = localStorage.getItem(KEY_EMAIL);
+        if (cachedEmail) {
+          return { email: cachedEmail,
+                   perfil: (localStorage.getItem(KEY_PERFIL) || "fiscal"),
+                   nome: localStorage.getItem(KEY_NOME) || "" };
+        }
+        return { email: email, perfil: "fiscal", nome: "" };
       });
     });
   }
