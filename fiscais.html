@@ -169,10 +169,8 @@
   </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="config.js?v=10"></script>
-<script src="auth.js?v=10"></script>
-<script src="menu.js?v=10"></script>
+<script src="config.js?v=11"></script>
+<script src="menu.js?v=11"></script>
 
 <script>
   // SUPA_URL / SUPA_KEY definidos em config.js
@@ -185,10 +183,11 @@
   var _emailRemovendo  = null;
 
   window.onload = function() {
-    protegerPagina("gerente").then(function(user){
-      if (!user) return;  // protegerPagina ja redirecionou
-      carregarFiscais();
-    });
+    if (localStorage.getItem(KEY_PERFIL) !== "gerente") {
+      window.location.href = "index.html";
+      return;
+    }
+    carregarFiscais();
   };
 
   // ── CARREGAR ────────────────────────────────────────────────
