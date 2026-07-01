@@ -118,6 +118,23 @@
       document.addEventListener("DOMContentLoaded", renderMenu);
     }
   }
-  tentarRenderMenu();
+
+  // Aguarda a sessão (auth.js) para ter e-mail/perfil corretos antes de montar
+  // o menu — senão os itens de gerente não apareceriam (o perfil chega async).
+  if (window.sessaoPronta && typeof window.sessaoPronta.then === "function") {
+    window.sessaoPronta.then(function(user) {
+      if (user && user.email) {
+        emailFiscal = user.email;
+        perfil      = user.perfil || "";
+        nomeFiscal  = user.nome || user.email;
+      } else {
+        emailFiscal = "";  // sem sessão válida → não renderiza menu
+      }
+      tentarRenderMenu();
+    });
+  } else {
+    // Sem auth.js (ex.: fallback) — usa o cache do localStorage
+    tentarRenderMenu();
+  }
 
 })();

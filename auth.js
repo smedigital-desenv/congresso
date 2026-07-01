@@ -54,7 +54,7 @@
   //   { naoAutorizado: true }   -> logou no Google mas não está na allowlist
   //   null                      -> sem sessão
   // Popula o localStorage (cache usado por menu.js e pelas páginas).
-  window.verificarSessao = function() {
+  function carregarSessao() {
     return sb.auth.getSession().then(function(res) {
       var session = res && res.data ? res.data.session : null;
       if (!session || !session.user || !session.user.email) { return null; }
@@ -74,13 +74,21 @@
           });
         }
         var v = data[0];
+        // Normaliza o perfil (ex.: "Gerente"/" GERENTE " -> "gerente")
+        var perfil = (v.perfil || "fiscal").toString().trim().toLowerCase();
         localStorage.setItem(KEY_EMAIL,  v.email);
-        localStorage.setItem(KEY_PERFIL, v.perfil || "fiscal");
-        localStorage.setItem(KEY_NOME,   v.nome   || "");
-        return { email: v.email, perfil: v.perfil || "fiscal", nome: v.nome || "" };
+        localStorage.setItem(KEY_PERFIL, perfil);
+        localStorage.setItem(KEY_NOME,   v.nome || "");
+        return { email: v.email, perfil: perfil, nome: v.nome || "" };
       });
     });
-  };
+  }
+
+  // Executa a verificação UMA vez por carregamento e memoiza a promise,
+  // para que as páginas e o menu compartilhem o mesmo resultado
+  // (evita refetch e a corrida em que o menu renderizava antes do perfil).
+  window.sessaoPronta = carregarSessao();
+  window.verificarSessao = function() { return window.sessaoPronta; };
 
   // Guarda de página protegida. Redireciona ao login se não autenticado/autorizado.
   // perfilReq opcional: "gerente" para páginas exclusivas do gerente.
