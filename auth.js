@@ -19,6 +19,7 @@
   var KEY_EMAIL  = "fiscal_email";
   var KEY_PERFIL = "fiscal_perfil";
   var KEY_NOME   = "fiscal_nome";
+  var KEY_TOKENS = "presenca_tokens";  // backup próprio da sessão (ver obterSessao)
 
   // Cliente único de auth (mantém a sessão no localStorage e processa o
   // retorno do OAuth automaticamente ao carregar a página).
@@ -36,6 +37,7 @@
     localStorage.removeItem(KEY_EMAIL);
     localStorage.removeItem(KEY_PERFIL);
     localStorage.removeItem(KEY_NOME);
+    localStorage.removeItem(KEY_TOKENS);
   }
 
   // Inicia o fluxo de login com Google. Volta para a própria página.
@@ -63,24 +65,41 @@
   // Obtém a sessão de forma robusta: tenta getSession() e, se vier vazio,
   // aguarda o evento de inicialização (onAuthStateChange) — evita a corrida
   // em que getSession() é chamado antes de o cliente ler o storage.
+  // Guarda os tokens da sessão numa chave exclusiva nossa, imune à limpeza da
+  // chave do Supabase por outros apps que compartilham esta origem.
+  function salvarTokens(session) {
+    try {
+      if (session && session.refresh_token) {
+        localStorage.setItem(KEY_TOKENS, JSON.stringify({
+          access_token:  session.access_token,
+          refresh_token: session.refresh_token
+        }));
+      }
+    } catch (e) {}
+  }
+
   function obterSessao() {
     return sb.auth.getSession().then(function(res) {
       var s = res && res.data ? res.data.session : null;
-      if (s) return s;
-      return new Promise(function(resolve) {
-        var settled = false;
-        var timer = setTimeout(function(){ finish(null); }, 2500);
-        var ref = sb.auth.onAuthStateChange(function(_event, session) {
-          if (session) finish(session);
-        });
-        function finish(session) {
-          if (settled) return;
-          settled = true;
-          clearTimeout(timer);
-          try { ref.data.subscription.unsubscribe(); } catch (e) {}
-          resolve(session);
-        }
-      });
+      if (s) { salvarTokens(s); return s; }
+
+      // A chave de sessão do Supabase pode ter sido removida (esta origem
+      // hospeda vários apps). Restaura a partir do nosso backup próprio.
+      var raw = localStorage.getItem(KEY_TOKENS);
+      if (!raw) return null;
+      var t = null;
+      try { t = JSON.parse(raw); } catch (e) {}
+      if (!t || !t.refresh_token) return null;
+
+      console.log("[auth] sessao do Supabase ausente — restaurando do backup...");
+      return sb.auth.setSession({ access_token: t.access_token, refresh_token: t.refresh_token })
+        .then(function(r2) {
+          var s2 = r2 && r2.data ? r2.data.session : null;
+          if (s2) { salvarTokens(s2); return s2; }
+          localStorage.removeItem(KEY_TOKENS);
+          return null;
+        })
+        .catch(function() { localStorage.removeItem(KEY_TOKENS); return null; });
     });
   }
 
