@@ -227,6 +227,10 @@
           <svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
           E-mails
         </button>
+        <button class="btn-icon" id="btnQR" onclick="toggleQR()" style="display:none">
+          <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><path d="M14 14h.01M14 17h.01M17 14h.01M17 17h.01M20 14h.01M20 20h.01M17 20h.01M14 20h.01M20 17h.01"/></svg>
+          QR
+        </button>
         <button class="btn-icon" id="btnGerencial" onclick="toggleGerencial()" style="display:none">
           <svg viewBox="0 0 24 24"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
           Gerenciar
@@ -288,6 +292,37 @@
     </div>
 
     <div id="emailsLista">
+      <div class="estado"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>Carregando...</div>
+    </div>
+  </div>
+
+  <!-- TELA QR CODES -->
+  <div id="tela-qr" style="display:none">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
+      <button onclick="toggleQR()" style="display:flex;align-items:center;gap:6px;background:var(--surface);border:1px solid var(--border);color:var(--muted);border-radius:10px;padding:8px 14px;font-size:13px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;">
+        <svg viewBox="0 0 24 24" style="width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        Voltar ao dashboard
+      </button>
+      <span style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;">Envio de QR Codes</span>
+    </div>
+
+    <div class="email-resumo">
+      <div class="resumo-card"><div class="label">Total</div><div class="valor cor-total"    id="qrTotal">-</div></div>
+      <div class="resumo-card"><div class="label">Enviados</div><div class="valor cor-presente" id="qrEnviados">-</div></div>
+      <div class="resumo-card"><div class="label">Pendentes</div><div class="valor cor-taxa" id="qrPendentes">-</div></div>
+    </div>
+
+    <div class="filtros-email">
+      <button class="filtro-btn ativo" id="qfTodos"     onclick="filtrarQR('todos')">Todos</button>
+      <button class="filtro-btn"       id="qfEnviados"  onclick="filtrarQR('enviados')">Enviados</button>
+      <button class="filtro-btn"       id="qfPendentes" onclick="filtrarQR('pendentes')">Pendentes</button>
+    </div>
+
+    <div class="gerencial-busca" style="margin-bottom:12px;">
+      <input class="busca-input" id="qrBusca" type="text" placeholder="Buscar por nome, e-mail ou palestra..." oninput="renderizarQR()"/>
+    </div>
+
+    <div id="qrLista">
       <div class="estado"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>Carregando...</div>
     </div>
   </div>
@@ -552,11 +587,14 @@
       // Fecha outras telas
       telaAtual = "gerencial";
       telaEmailsAberta = false;
+      telaQRAberta = false;
       document.getElementById("tela-emails").style.display    = "none";
+      document.getElementById("tela-qr").style.display        = "none";
       document.getElementById("tela-dashboard").style.display = "none";
       document.getElementById("tela-gerencial").style.display = "block";
       document.getElementById("btnGerencial").classList.add("ativo");
       document.getElementById("btnEmails").classList.remove("ativo");
+      document.getElementById("btnQR").classList.remove("ativo");
       document.getElementById("gerencialBusca").value = "";
       renderizarGerencial();
     }
@@ -711,6 +749,11 @@
   var filtroEmail     = "todos";
   var telaEmailsAberta = false;
 
+  // ── QR ─────────────────────────────────────────────────────
+  var dadosQR      = [];      // participantes com info de qr_enviado
+  var filtroQR     = "todos";
+  var telaQRAberta = false;
+
   function toggleEmails() {
     if (telaEmailsAberta) {
       telaEmailsAberta = false;
@@ -720,10 +763,13 @@
       document.getElementById("btnEmails").classList.remove("ativo");
     } else {
       telaEmailsAberta = true;
+      telaQRAberta = false;
       telaAtual = "emails";
       document.getElementById("tela-dashboard").style.display  = "none";
       document.getElementById("tela-gerencial").style.display  = "none";
+      document.getElementById("tela-qr").style.display         = "none";
       document.getElementById("tela-emails").style.display     = "block";
+      document.getElementById("btnQR").classList.remove("ativo");
       document.getElementById("btnEmails").classList.add("ativo");
       document.getElementById("emailsBusca").value = "";
       filtroEmail = "todos";
@@ -809,6 +855,106 @@
     document.getElementById("emailsLista").innerHTML = html;
   }
 
+  // ── QR CODES ───────────────────────────────────────────────
+  function toggleQR() {
+    if (telaQRAberta) {
+      telaQRAberta = false;
+      telaAtual = "dashboard";
+      document.getElementById("tela-qr").style.display        = "none";
+      document.getElementById("tela-dashboard").style.display = "block";
+      document.getElementById("btnQR").classList.remove("ativo");
+    } else {
+      telaQRAberta = true;
+      telaEmailsAberta = false;
+      telaAtual = "qr";
+      document.getElementById("tela-dashboard").style.display = "none";
+      document.getElementById("tela-gerencial").style.display = "none";
+      document.getElementById("tela-emails").style.display    = "none";
+      document.getElementById("tela-qr").style.display        = "block";
+      document.getElementById("btnQR").classList.add("ativo");
+      document.getElementById("btnEmails").classList.remove("ativo");
+      document.getElementById("qrBusca").value = "";
+      filtroQR = "todos";
+      ["qfTodos","qfEnviados","qfPendentes"].forEach(function(id){ document.getElementById(id).classList.remove("ativo"); });
+      document.getElementById("qfTodos").classList.add("ativo");
+      carregarQR();
+    }
+  }
+
+  function carregarQR() {
+    document.getElementById("qrLista").innerHTML =
+      '<div class="estado"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>Carregando...</div>';
+
+    fetchAll(SUPA_URL + "/participantes?select=token,nome,email,qr_enviado,qr_url,palestras(nome)&order=qr_enviado.asc,nome.asc",
+      h())
+      .then(function(data) {
+        dadosQR = Array.isArray(data) ? data : [];
+        renderizarQR();
+      })
+      .catch(function(){
+        document.getElementById("qrLista").innerHTML = '<div class="estado">Erro ao carregar.</div>';
+      });
+  }
+
+  function filtrarQR(tipo) {
+    filtroQR = tipo;
+    ["qfTodos","qfEnviados","qfPendentes"].forEach(function(id){ document.getElementById(id).classList.remove("ativo"); });
+    document.getElementById(tipo==="todos"?"qfTodos":tipo==="enviados"?"qfEnviados":"qfPendentes").classList.add("ativo");
+    renderizarQR();
+  }
+
+  function renderizarQR() {
+    var busca = document.getElementById("qrBusca").value.trim().toLowerCase();
+
+    var lista = dadosQR.filter(function(p) {
+      if (filtroQR === "enviados"  && !p.qr_enviado) return false;
+      if (filtroQR === "pendentes" &&  p.qr_enviado) return false;
+      if (busca) {
+        var nome     = (p.nome  || "").toLowerCase();
+        var email    = (p.email || "").toLowerCase();
+        var palestra = p.palestras ? p.palestras.nome.toLowerCase() : "";
+        if (nome.indexOf(busca)===-1 && email.indexOf(busca)===-1 && palestra.indexOf(busca)===-1) return false;
+      }
+      return true;
+    });
+
+    var total     = dadosQR.length;
+    var enviados  = dadosQR.filter(function(p){ return p.qr_enviado; }).length;
+    var pendentes = total - enviados;
+
+    document.getElementById("qrTotal").textContent     = total;
+    document.getElementById("qrEnviados").textContent  = enviados;
+    document.getElementById("qrPendentes").textContent = pendentes;
+
+    if (lista.length === 0) {
+      document.getElementById("qrLista").innerHTML =
+        '<div class="estado"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>Nenhum registro encontrado.</div>';
+      return;
+    }
+
+    var html = "";
+    lista.forEach(function(p) {
+      var nome     = p.nome  || p.token;
+      var email    = p.email || "-";
+      var palestra = p.palestras ? p.palestras.nome : "-";
+      var enviado  = p.qr_enviado;
+      var temQR    = p.qr_url && /fid=/.test(p.qr_url);
+
+      html += '<div class="email-row ' + (enviado ? "enviado" : "pendente") + '">';
+      html +=   '<div class="email-info">';
+      html +=     '<div class="email-nome">' + escapeHtml(nome) + '</div>';
+      html +=     '<div class="email-detalhe">' + escapeHtml(email) + ' &middot; ' + escapeHtml(palestra) + '</div>';
+      if (!temQR) html += '<div class="email-detalhe" style="margin-top:2px;font-size:11px;color:var(--warning)">QR ainda nao gerado</div>';
+      html +=   '</div>';
+      html +=   (enviado
+        ? '<span class="tag-enviado">&#10003; Enviado</span>'
+        : '<span class="tag-pendente">Pendente</span>');
+      html += '</div>';
+    });
+
+    document.getElementById("qrLista").innerHTML = html;
+  }
+
   // ── ACOES RAPIDAS ──────────────────────────────────────────
   // APPS_URL definido em config.js
 
@@ -857,6 +1003,8 @@
     if (btnG) btnG.style.display = "flex";
     var btnE = document.getElementById("btnEmails");
     if (btnE) btnE.style.display = "flex";
+    var btnQ = document.getElementById("btnQR");
+    if (btnQ) btnQ.style.display = "flex";
     var acoes = document.getElementById("acoesGerente");
     if (acoes) acoes.classList.add("visivel");
   }
