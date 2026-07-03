@@ -44,17 +44,3 @@ function fetchAll(url, headers, pageSize) {
   }
   return grab(0);
 }
-
-// ─────────────────────────────────────────────────────────────
-// ACESSO LIVRE (temporário) — dispensa o login enquanto a autenticação
-// definitiva não é integrada (reaproveitando os projetos gom/mapa).
-// Define uma identidade padrão de gerente para que todas as telas funcionem
-// sem tela de login. Para reativar o login, remova este bloco.
-// ─────────────────────────────────────────────────────────────
-try {
-  if (!localStorage.getItem("fiscal_email")) {
-    localStorage.setItem("fiscal_email",  "acesso-livre");
-    localStorage.setItem("fiscal_perfil", "gerente");
-    localStorage.setItem("fiscal_nome",   "Acesso livre");
-  }
-} catch (e) {}

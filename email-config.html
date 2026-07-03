@@ -61,8 +61,10 @@
   </style>
 </head>
 <body>
-<script src="config.js?v=12"></script>
-<script src="menu.js?v=12"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js?v=13"></script>
+<script src="auth.js?v=13"></script>
+<script src="menu.js?v=13"></script>
 <div class="topbar">
   <h1>Configurar E-mail de Confirmacao</h1>
   <button class="btn-salvar" id="btnSalvar" onclick="salvar()">
@@ -150,6 +152,13 @@
 
   // ── CARREGAR CONFIG ──────────────────────────────────────────
   window.onload = function() {
+    protegerPagina("gerente").then(function(user){
+      if (!user) return;  // protegerPagina ja redirecionou
+      carregarConfig();
+    });
+  };
+
+  function carregarConfig() {
     fetch(SUPA_URL + "/email_config?id=eq.1&limit=1", { headers: h() })
       .then(function(r){ return r.json(); })
       .then(function(data) {

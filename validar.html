@@ -39,8 +39,10 @@
   </style>
 </head>
 <body>
-<script src="config.js?v=12"></script>
-<script src="menu.js?v=12"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js?v=13"></script>
+<script src="auth.js?v=13"></script>
+<script src="menu.js?v=13"></script>
   <div class="topbar">
     <div style="flex:1">
       <div class="topbar-title">Validar Presenca</div>
@@ -95,9 +97,16 @@
   function salvarCache(lista) { localStorage.setItem(KEY_CACHE,JSON.stringify(lista)); localStorage.setItem(KEY_CACHE_DT,dataHoje()); }
 
   window.onload = function() {
-    if (!emailFiscal) { window.location.href="index.html"; return; }
+    protegerPagina().then(function(user){
+      if (!user) return;  // protegerPagina ja redirecionou
+      emailFiscal = user.email;
+      iniciarPagina();
+    });
+  };
+
+  function iniciarPagina() {
     document.getElementById("topFiscal").textContent = emailFiscal;
-    document.getElementById("fFiscal").innerHTML = '<span class="badge-fiscal">'+emailFiscal+'</span>';
+    document.getElementById("fFiscal").innerHTML = '<span class="badge-fiscal">'+escapeHtml(emailFiscal)+'</span>';
     document.getElementById("fToken").textContent = tokenGlobal || "-";
 
     if (!tokenGlobal) {

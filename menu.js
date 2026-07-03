@@ -100,36 +100,16 @@
 
   }
 
-  // Logout global
+  // Logout global — usa a sessão (auth.js) quando disponível
   window.menuLogout = function() {
+    if (typeof window.logoutAuth === "function") { window.logoutAuth(); return; }
     localStorage.removeItem(KEY_EMAIL);
     localStorage.removeItem(KEY_PERFIL);
     localStorage.removeItem(KEY_NOME);
     window.location.href = "index.html";
   };
 
-  // Verifica perfil no Supabase e salva no localStorage
-  // Chamado pelo index.html após o login
-  window.verificarECarregarPerfil = function(email, callback) {
-    fetch(SUPA_URL + "/validadores?email=eq." + encodeURIComponent(email) + "&select=email,nome,perfil&limit=1",
-      { headers: { "apikey": SUPA_KEY, "Authorization": "Bearer " + SUPA_KEY } }
-    )
-    .then(function(r){ return r.json(); })
-    .then(function(data) {
-      if (data && data.length > 0) {
-        localStorage.setItem(KEY_EMAIL,  data[0].email);
-        localStorage.setItem(KEY_PERFIL, data[0].perfil || "fiscal");
-        localStorage.setItem(KEY_NOME,   data[0].nome   || "");
-        if (callback) callback(true, data[0]);
-      } else {
-        if (callback) callback(false, null);
-      }
-    })
-    .catch(function(){ if (callback) callback(false, null); });
-  };
-
   // Renderiza assim que o body estiver disponível
-  // Como o script é carregado logo após <body>, pode precisar aguardar
   function tentarRenderMenu() {
     if (document.body) {
       renderMenu();
@@ -137,6 +117,22 @@
       document.addEventListener("DOMContentLoaded", renderMenu);
     }
   }
-  tentarRenderMenu();
+
+  // Aguarda a sessão (auth.js) para ter e-mail/perfil corretos antes de montar
+  // o menu — senão os itens de gerente não apareceriam (o perfil chega async).
+  if (window.sessaoPronta && typeof window.sessaoPronta.then === "function") {
+    window.sessaoPronta.then(function(user) {
+      if (user && user.email) {
+        emailFiscal = user.email;
+        perfil      = user.perfil || "";
+        nomeFiscal  = user.nome || user.email;
+      } else {
+        emailFiscal = "";  // sem sessão válida → não renderiza menu
+      }
+      tentarRenderMenu();
+    });
+  } else {
+    tentarRenderMenu();
+  }
 
 })();

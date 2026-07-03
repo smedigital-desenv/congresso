@@ -195,8 +195,10 @@
 <!-- TOPBAR -->
 <!-- topbar removida: navegação feita pelo menu global -->
 
-<script src="config.js?v=12"></script>
-<script src="menu.js?v=12"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js?v=13"></script>
+<script src="auth.js?v=13"></script>
+<script src="menu.js?v=13"></script>
 <div class="content">
 
   <!-- TELA DASHBOARD -->
@@ -997,19 +999,25 @@
   }
 
   // ── INIT ────────────────────────────────────────────────────
-  // Exibe elementos exclusivos de gerente
-  if (localStorage.getItem("fiscal_perfil") === "gerente") {
-    var btnG = document.getElementById("btnGerencial");
-    if (btnG) btnG.style.display = "flex";
-    var btnE = document.getElementById("btnEmails");
-    if (btnE) btnE.style.display = "flex";
-    var btnQ = document.getElementById("btnQR");
-    if (btnQ) btnQ.style.display = "flex";
-    var acoes = document.getElementById("acoesGerente");
-    if (acoes) acoes.classList.add("visivel");
-  }
-  carregar().then(function(ok){ if (ok) renderizarDashboard(); });
-  setInterval(function(){ if (telaAtual==="dashboard" && !palestraAtual) recarregar(); }, 60000);
+  protegerPagina().then(function(user) {
+    if (!user) return;  // protegerPagina ja redirecionou
+    emailFiscal = user.email;
+
+    // Exibe elementos exclusivos de gerente
+    if (user.perfil === "gerente") {
+      var btnG = document.getElementById("btnGerencial");
+      if (btnG) btnG.style.display = "flex";
+      var btnE = document.getElementById("btnEmails");
+      if (btnE) btnE.style.display = "flex";
+      var btnQ = document.getElementById("btnQR");
+      if (btnQ) btnQ.style.display = "flex";
+      var acoes = document.getElementById("acoesGerente");
+      if (acoes) acoes.classList.add("visivel");
+    }
+
+    carregar().then(function(ok){ if (ok) renderizarDashboard(); });
+    setInterval(function(){ if (telaAtual==="dashboard" && !palestraAtual) recarregar(); }, 60000);
+  });
 </script>
 </body>
 </html>
