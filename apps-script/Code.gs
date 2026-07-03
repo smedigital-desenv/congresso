@@ -16,7 +16,8 @@
  *     do chamador seja um gerente cadastrado em validadores.
  */
 
-var SUPABASE_URL = "https://kormvmwdkyssxhdkgthd.supabase.co";
+var SUPABASE_URL = "https://gdagejrpobufgbjoxtsa.supabase.co";  // projeto do gom
+var SUPABASE_SCHEMA = "presenca";                              // schema da presença
 
 // A chave fica em Project Settings -> Script Properties (chave: SUPABASE_SERVICE_KEY).
 // Use a service_role do Supabase (Settings -> API). NUNCA cole a service_role no front.
@@ -112,10 +113,12 @@ function supaFetch(path, method, body) {
   var options = {
     method:  method || "GET",
     headers: {
-      "apikey":        key,
-      "Authorization": "Bearer " + key,
-      "Content-Type":  "application/json",
-      "Prefer":        prefer
+      "apikey":          key,
+      "Authorization":   "Bearer " + key,
+      "Content-Type":    "application/json",
+      "Prefer":          prefer,
+      "Accept-Profile":  SUPABASE_SCHEMA,
+      "Content-Profile": SUPABASE_SCHEMA
     },
     muteHttpExceptions: true
   };

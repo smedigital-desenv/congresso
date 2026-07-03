@@ -61,8 +61,8 @@
   </style>
 </head>
 <body>
-<script src="config.js?v=11"></script>
-<script src="menu.js?v=11"></script>
+<script src="config.js?v=12"></script>
+<script src="menu.js?v=12"></script>
 <div class="topbar">
   <h1>Configurar E-mail de Confirmacao</h1>
   <button class="btn-salvar" id="btnSalvar" onclick="salvar()">
@@ -146,7 +146,7 @@
 <script>
   // SUPA_URL / SUPA_KEY definidos em config.js
 
-  function h() { return { "apikey": SUPA_KEY, "Authorization": "Bearer " + SUPA_KEY, "Content-Type": "application/json", "Prefer": "return=representation" }; }
+  function h() { return { "apikey": SUPA_KEY, "Authorization": "Bearer " + SUPA_KEY, "Content-Type": "application/json", "Prefer": "return=representation", "Accept-Profile": SUPA_SCHEMA, "Content-Profile": SUPA_SCHEMA }; }
 
   // ── CARREGAR CONFIG ──────────────────────────────────────────
   window.onload = function() {

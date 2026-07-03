@@ -47,8 +47,8 @@
   </style>
 </head>
 <body>
-<script src="config.js?v=11"></script>
-<script src="menu.js?v=11"></script>
+<script src="config.js?v=12"></script>
+<script src="menu.js?v=12"></script>
 <div class="container">
   <div class="logo">
     <div class="logo-icon">
@@ -93,7 +93,7 @@
   var html5QrCode  = null;
 
   function supaHeaders() {
-    return { "apikey": SUPA_KEY, "Authorization": "Bearer " + SUPA_KEY };
+    return { "apikey": SUPA_KEY, "Authorization": "Bearer " + SUPA_KEY, "Accept-Profile": SUPA_SCHEMA, "Content-Profile": SUPA_SCHEMA };
   }
 
   function dataHoje() { return new Date().toISOString().slice(0,10); }
