@@ -205,7 +205,7 @@
 
   function logout() {
     if (html5QrCode) { html5QrCode.stop().catch(function(){}); html5QrCode=null; }
-    logoutAuth();  // encerra a sessao (SSO — sai do GOM tambem)
+    logoutAuth();  // sai so da presenca (nao mexe na sessao do GOM)
   }
 
   document.getElementById("inputToken").addEventListener("keydown", function(e){ if(e.key==="Enter") irParaValidar(); });

@@ -22,6 +22,7 @@
   var KEY_EMAIL  = "fiscal_email";
   var KEY_PERFIL = "fiscal_perfil";
   var KEY_NOME   = "fiscal_nome";
+  var KEY_LOGOUT = "presenca_deslogado";  // logout só da presença (não mexe no GOM)
 
   // Cliente único (mesma config/projeto do GOM → sessão compartilhada).
   window.sb = window.supabase.createClient(SUPA_PROJECT_URL, SUPA_KEY, {
@@ -40,20 +41,27 @@
     localStorage.removeItem(KEY_NOME);
   }
 
-  // Inicia o login com Google (mesmo provider do GOM). Volta para a própria página.
+  // Inicia o login. Se já houver sessão (ex.: logado no GOM), reaproveita na hora
+  // (SSO). Senão, dispara o OAuth do Google. Sempre limpa o "deslogado da presença".
   window.loginGoogle = function() {
-    return sb.auth.signInWithOAuth({
-      provider: "google",
-      options: { redirectTo: window.location.origin + window.location.pathname }
+    localStorage.removeItem(KEY_LOGOUT);
+    return sb.auth.getSession().then(function(res) {
+      var s = res && res.data ? res.data.session : null;
+      if (s) { window.location.reload(); return; }  // usa a sessão existente
+      return sb.auth.signInWithOAuth({
+        provider: "google",
+        options: { redirectTo: window.location.origin + window.location.pathname }
+      });
     });
   };
 
-  // Logout do SSO (encerra a sessão compartilhada — sai do GOM também).
+  // Logout SÓ da presença: marca localmente e volta ao login, SEM signOut —
+  // a sessão do Supabase (e do GOM) permanece intacta.
   window.logoutAuth = function() {
     limparCache();
-    return sb.auth.signOut().catch(function(){}).then(function() {
-      window.location.href = "index.html";
-    });
+    localStorage.setItem(KEY_LOGOUT, "1");
+    window.location.href = "index.html";
+    return Promise.resolve();
   };
 
   // Verifica a sessão e confere o e-mail na allowlist (presenca.validadores).
@@ -62,6 +70,8 @@
   //   { naoAutorizado: true }  -> logado no Google mas fora da allowlist (NÃO desloga)
   //   null                     -> sem sessão
   function carregarSessao() {
+    // Se o usuário deslogou da presença, ignora a sessão compartilhada até novo login.
+    if (localStorage.getItem(KEY_LOGOUT)) { return Promise.resolve(null); }
     return sb.auth.getSession().then(function(res) {
       var session = res && res.data ? res.data.session : null;
       if (!session || !session.user || !session.user.email) { return null; }
