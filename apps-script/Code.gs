@@ -16,7 +16,7 @@
  *     do chamador seja um gerente cadastrado em validadores.
  */
 
-var SUPABASE_URL = "https://gdagejrpobufgbjoxtsa.supabase.co";  // projeto do gom
+var SUPABASE_URL = "https://iqldovwttomkjkoakosc.supabase.co";  // projeto do gom
 var SUPABASE_SCHEMA = "presenca";                              // schema da presença
 
 // A chave fica em Project Settings -> Script Properties (chave: SUPABASE_SERVICE_KEY).

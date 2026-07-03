@@ -7,10 +7,10 @@
 // A chave "anon" é pública por design. A segurança real depende das policies de RLS
 // configuradas no Supabase — veja SECURITY.md.
 // Projeto do gom; tabelas da presença no schema "presenca".
-var SUPA_PROJECT_URL = "https://gdagejrpobufgbjoxtsa.supabase.co";
+var SUPA_PROJECT_URL = "https://iqldovwttomkjkoakosc.supabase.co";
 var SUPA_URL    = SUPA_PROJECT_URL + "/rest/v1";
 var SUPA_SCHEMA = "presenca";
-var SUPA_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdkYWdlanJwb2J1Zmdiam94dHNhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAzMjU2MTIsImV4cCI6MjA5NTkwMTYxMn0.CyfIfGDB2VmQW2FAOoPswYTG5P1d6V__2picPud-64I";
+var SUPA_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlxbGRvdnd0dG9ta2prb2Frb3NjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA1MDU4NzksImV4cCI6MjA5NjA4MTg3OX0.4dYeK5iIEgSD7CEWyLoaqXEXvuITVNVpTlfdmCyJCI0";
 var APPS_URL = "https://script.google.com/macros/s/AKfycbwgn-kasXrfTWULBUe_7chco-O9TUFjFLVtXqkfyBs8WuGHKDLX8hhiENd2r-bly6-E0A/exec";
 
 /**
