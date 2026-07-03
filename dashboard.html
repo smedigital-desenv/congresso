@@ -195,8 +195,8 @@
 <!-- TOPBAR -->
 <!-- topbar removida: navegação feita pelo menu global -->
 
-<script src="config.js?v=11"></script>
-<script src="menu.js?v=11"></script>
+<script src="config.js?v=12"></script>
+<script src="menu.js?v=12"></script>
 <div class="content">
 
   <!-- TELA DASHBOARD -->
@@ -375,7 +375,7 @@
   var KEY_EMAIL = "fiscal_email";
 
   function h(extra) {
-    var base = { "apikey": SUPA_KEY, "Authorization": "Bearer " + SUPA_KEY, "Content-Type": "application/json", "Prefer": "return=representation" };
+    var base = { "apikey": SUPA_KEY, "Authorization": "Bearer " + SUPA_KEY, "Content-Type": "application/json", "Prefer": "return=representation", "Accept-Profile": SUPA_SCHEMA, "Content-Profile": SUPA_SCHEMA };
     if (extra) Object.assign(base, extra);
     return base;
   }
@@ -721,7 +721,7 @@
     // RLS precisa de policy de DELETE para anon
     fetch(SUPA_URL + "/presencas?token=eq." + encodeURIComponent(token), {
       method: "DELETE",
-      headers: { "apikey": SUPA_KEY, "Authorization": "Bearer " + SUPA_KEY }
+      headers: { "apikey": SUPA_KEY, "Authorization": "Bearer " + SUPA_KEY, "Content-Profile": SUPA_SCHEMA }
     })
     .then(function(r) {
       if (r.status === 204 || r.status === 200) {

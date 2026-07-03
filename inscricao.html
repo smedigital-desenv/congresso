@@ -49,8 +49,8 @@
   </style>
 </head>
 <body>
-<script src="config.js?v=11"></script>
-<script src="menu.js?v=11"></script>
+<script src="config.js?v=12"></script>
+<script src="menu.js?v=12"></script>
 <div class="container">
   <div class="logo">
     <div class="logo-icon">
@@ -107,7 +107,7 @@
   // SUPA_URL / SUPA_KEY definidos em config.js
 
   function supaHeaders() {
-    return { "apikey": SUPA_KEY, "Authorization": "Bearer " + SUPA_KEY };
+    return { "apikey": SUPA_KEY, "Authorization": "Bearer " + SUPA_KEY, "Accept-Profile": SUPA_SCHEMA, "Content-Profile": SUPA_SCHEMA };
   }
 
   document.getElementById("inputCPF").addEventListener("input", function() {
@@ -135,7 +135,7 @@
     // Se a função ainda não existir no Supabase, faz fallback para a consulta antiga.
     fetch(SUPA_URL + "/rpc/consultar_inscricao", {
       method:  "POST",
-      headers: { "apikey": SUPA_KEY, "Authorization": "Bearer " + SUPA_KEY, "Content-Type": "application/json" },
+      headers: { "apikey": SUPA_KEY, "Authorization": "Bearer " + SUPA_KEY, "Content-Type": "application/json", "Accept-Profile": SUPA_SCHEMA, "Content-Profile": SUPA_SCHEMA },
       body:    JSON.stringify({ p_email: email, p_cpf: cpf })
     })
     .then(function(r){ return r.json(); })

@@ -169,14 +169,14 @@
   </div>
 </div>
 
-<script src="config.js?v=11"></script>
-<script src="menu.js?v=11"></script>
+<script src="config.js?v=12"></script>
+<script src="menu.js?v=12"></script>
 
 <script>
   // SUPA_URL / SUPA_KEY definidos em config.js
   var KEY_PERFIL = "fiscal_perfil";
 
-  function h() { return {"apikey":SUPA_KEY,"Authorization":"Bearer "+SUPA_KEY,"Content-Type":"application/json","Prefer":"return=representation"}; }
+  function h() { return {"apikey":SUPA_KEY,"Authorization":"Bearer "+SUPA_KEY,"Content-Type":"application/json","Prefer":"return=representation","Accept-Profile":SUPA_SCHEMA,"Content-Profile":SUPA_SCHEMA}; }
 
   var _lista           = [];
   var _emailEditando   = null;
@@ -361,7 +361,7 @@
     if (!_emailRemovendo) return;
     fetch(SUPA_URL + "/validadores?email=eq." + encodeURIComponent(_emailRemovendo), {
       method: "DELETE",
-      headers: { "apikey": SUPA_KEY, "Authorization": "Bearer " + SUPA_KEY }
+      headers: { "apikey": SUPA_KEY, "Authorization": "Bearer " + SUPA_KEY, "Content-Profile": SUPA_SCHEMA }
     })
     .then(function(r) {
       if (r.status === 204 || r.status === 200) {
