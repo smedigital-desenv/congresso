@@ -5,12 +5,10 @@
  *   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
  *   <script src="config.js"></script>
  *
- * Como a presença está no MESMO projeto Supabase do GOM (mesma origem), a sessão
- * é COMPARTILHADA — é um SSO. A allowlist da presença é a tabela
- * `presenca.validadores`; o perfil (fiscal/gerente) vem de lá.
- *
- * Importante: quando o e-mail logado NÃO está em validadores, apenas negamos o
- * acesso — NÃO chamamos signOut, para não derrubar a sessão do GOM.
+ * Usa o MESMO projeto Supabase do GOM (mesmo provider Google + tabela de allowlist
+ * `presenca.validadores`), mas com storageKey PRÓPRIO ("presenca-auth") → a sessão
+ * da presença é INDEPENDENTE da do GOM. Login, logout e troca de conta na presença
+ * não afetam o GOM (e vice-versa). O perfil (fiscal/gerente) vem de validadores.
  */
 (function() {
 
@@ -22,16 +20,18 @@
   var KEY_EMAIL  = "fiscal_email";
   var KEY_PERFIL = "fiscal_perfil";
   var KEY_NOME   = "fiscal_nome";
-  var KEY_LOGOUT = "presenca_deslogado";  // logout só da presença (não mexe no GOM)
 
-  // Cliente único (mesma config/projeto do GOM → sessão compartilhada).
+  // Mesmo PROJETO do GOM (mesmo provider Google + validadores), mas com storageKey
+  // PRÓPRIO → sessão INDEPENDENTE do GOM. Assim login/logout/troca de conta na
+  // presença não afetam o GOM (e vice-versa).
   window.sb = window.supabase.createClient(SUPA_PROJECT_URL, SUPA_KEY, {
     auth: {
       persistSession:     true,
       autoRefreshToken:   true,
       detectSessionInUrl: true,
       flowType:           "pkce",
-      storage:            window.localStorage
+      storage:            window.localStorage,
+      storageKey:         "presenca-auth"
     }
   });
 
@@ -41,27 +41,25 @@
     localStorage.removeItem(KEY_NOME);
   }
 
-  // Inicia o login. Se já houver sessão (ex.: logado no GOM), reaproveita na hora
-  // (SSO). Senão, dispara o OAuth do Google. Sempre limpa o "deslogado da presença".
+  // Login com Google. Força o seletor de conta (prompt=select_account) para permitir
+  // trocar de conta a cada login (útil em dispositivos compartilhados).
   window.loginGoogle = function() {
-    localStorage.removeItem(KEY_LOGOUT);
-    return sb.auth.getSession().then(function(res) {
-      var s = res && res.data ? res.data.session : null;
-      if (s) { window.location.reload(); return; }  // usa a sessão existente
-      return sb.auth.signInWithOAuth({
-        provider: "google",
-        options: { redirectTo: window.location.origin + window.location.pathname }
-      });
+    return sb.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: window.location.origin + window.location.pathname,
+        queryParams: { prompt: "select_account" }
+      }
     });
   };
 
-  // Logout SÓ da presença: marca localmente e volta ao login, SEM signOut —
-  // a sessão do Supabase (e do GOM) permanece intacta.
+  // Logout da presença: encerra a sessão PRÓPRIA da presença (storageKey isolado).
+  // Como o GOM usa outra storageKey, a sessão do GOM não é afetada.
   window.logoutAuth = function() {
     limparCache();
-    localStorage.setItem(KEY_LOGOUT, "1");
-    window.location.href = "index.html";
-    return Promise.resolve();
+    return sb.auth.signOut().catch(function(){}).then(function() {
+      window.location.href = "index.html";
+    });
   };
 
   // Verifica a sessão e confere o e-mail na allowlist (presenca.validadores).
@@ -70,8 +68,6 @@
   //   { naoAutorizado: true }  -> logado no Google mas fora da allowlist (NÃO desloga)
   //   null                     -> sem sessão
   function carregarSessao() {
-    // Se o usuário deslogou da presença, ignora a sessão compartilhada até novo login.
-    if (localStorage.getItem(KEY_LOGOUT)) { return Promise.resolve(null); }
     return sb.auth.getSession().then(function(res) {
       var session = res && res.data ? res.data.session : null;
       if (!session || !session.user || !session.user.email) { return null; }
@@ -89,9 +85,12 @@
       .then(function(data) {
         if (!Array.isArray(data)) throw new Error("resposta inesperada");
         if (data.length === 0) {
-          // Fora da allowlist: nega SEM signOut (preserva a sessão do GOM).
+          // Fora da allowlist: encerra a sessão da presença (isolada; não afeta o GOM),
+          // liberando a troca de conta no próximo login.
           limparCache();
-          return { naoAutorizado: true, email: email };
+          return sb.auth.signOut().catch(function(){}).then(function() {
+            return { naoAutorizado: true, email: email };
+          });
         }
         var v = data[0];
         var perfil = (v.perfil || "fiscal").toString().trim().toLowerCase();
