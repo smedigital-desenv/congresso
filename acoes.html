@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ações em Andamento — Subsecretarias</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@500;600&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg:#0f1117;--surface:#1a1d27;--surface2:#20242f;--border:#2a2d3a;
+      --accent:#4f8ef7;--accent2:#7c3aed;--success:#22c55e;--warn:#f59e0b;--danger:#ef4444;
+      --text:#e8eaf0;--muted:#6b7280;--radius:14px;
+      --c-ped:#4f8ef7;--c-adm:#f59e0b;--c-ali:#22c55e;--c-lic:#a78bfa;
+    }
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding:24px 16px 60px;}
+    body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 60% 40% at 20% 20%,rgba(79,142,247,.07) 0%,transparent 70%),radial-gradient(ellipse 50% 50% at 80% 80%,rgba(124,58,237,.07) 0%,transparent 70%);pointer-events:none;z-index:0;}
+    .wrap{width:100%;max-width:1100px;margin:0 auto;position:relative;z-index:1;}
+
+    .head{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:22px;flex-wrap:wrap;}
+    .head-l{display:flex;align-items:center;gap:14px;}
+    .logo-icon{width:48px;height:48px;flex-shrink:0;background:linear-gradient(135deg,var(--accent),var(--accent2));border-radius:14px;display:inline-flex;align-items:center;justify-content:center;box-shadow:0 8px 24px rgba(79,142,247,.25);}
+    .logo-icon svg{width:24px;height:24px;fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
+    .head h1{font-size:21px;font-weight:700;line-height:1.2;}
+    .head p{font-size:13px;color:var(--muted);margin-top:3px;}
+    .btn-print{display:inline-flex;align-items:center;gap:8px;background:var(--surface);color:var(--text);border:1px solid var(--border);border-radius:10px;padding:10px 15px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:.15s;}
+    .btn-print:hover{border-color:var(--accent);color:var(--accent);}
+
+    /* Resumo geral */
+    .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:14px;}
+    .kpi{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;animation:fadeUp .3s ease both;}
+    .kpi .n{font-size:26px;font-weight:700;font-family:'DM Mono',monospace;line-height:1;}
+    .kpi .l{font-size:11px;color:var(--muted);margin-top:6px;font-weight:600;letter-spacing:.3px;}
+    .kpi.exec .n{color:var(--accent);}
+    .kpi.nao .n{color:var(--muted);}
+    .kpi.blq .n{color:var(--warn);}
+    .kpi.atr .n{color:var(--danger);}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+    /* Cards das subsecretarias (overview + filtro) */
+    .subs{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:10px;margin-bottom:20px;}
+    .subcard{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;cursor:pointer;position:relative;overflow:hidden;transition:.15s;animation:fadeUp .3s ease both;}
+    .subcard::after{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--sc,#4f8ef7);}
+    .subcard:hover{border-color:var(--sc,#4f8ef7);}
+    .subcard.on{border-color:var(--sc,#4f8ef7);box-shadow:0 0 0 3px color-mix(in srgb,var(--sc,#4f8ef7) 18%,transparent);}
+    .subcard .nm{font-size:13px;font-weight:700;line-height:1.35;min-height:35px;}
+    .subcard .ct{display:flex;gap:10px;margin-top:10px;flex-wrap:wrap;}
+    .subcard .ct span{font-size:11px;color:var(--muted);}
+    .subcard .ct b{color:var(--text);font-family:'DM Mono',monospace;font-weight:600;}
+    .subcard .pb{height:5px;border-radius:3px;background:var(--border);margin-top:10px;overflow:hidden;}
+    .subcard .pb i{display:block;height:100%;background:var(--sc,#4f8ef7);border-radius:3px;}
+
+    /* Filtros */
+    .toolbar{display:flex;flex-wrap:wrap;gap:14px;align-items:flex-end;justify-content:space-between;margin-bottom:18px;}
+    .fgroup label{display:block;font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:7px;}
+    .chips{display:flex;flex-wrap:wrap;gap:6px;}
+    .chip{background:var(--surface);border:1px solid var(--border);color:var(--muted);font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;padding:7px 12px;border-radius:9px;cursor:pointer;transition:.15s;}
+    .chip:hover{color:var(--text);border-color:var(--accent);}
+    .chip.on{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;border-color:transparent;}
+    .search{background:var(--surface);border:1px solid var(--border);border-radius:9px;padding:9px 13px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;outline:none;min-width:200px;transition:.2s;}
+    .search:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(79,142,247,.15);}
+
+    /* Seções por subsecretaria */
+    .secsub{margin-bottom:26px;}
+    .secsub-h{display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap;}
+    .secsub-h .dot{width:10px;height:10px;border-radius:3px;background:var(--sc,#4f8ef7);flex-shrink:0;}
+    .secsub-h h2{font-size:15px;font-weight:700;letter-spacing:.2px;}
+    .secsub-h .cnt{font-size:12px;color:var(--muted);font-family:'DM Mono',monospace;}
+
+    .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:10px;}
+    .acao{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;display:flex;flex-direction:column;gap:9px;animation:fadeUp .25s ease both;border-left:3px solid var(--sc,#4f8ef7);}
+    .acao .top{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;}
+    .acao .tt{font-size:13.5px;font-weight:700;line-height:1.4;}
+    .pills{display:flex;gap:5px;flex-wrap:wrap;flex-shrink:0;}
+    .pill{font-size:10px;font-weight:700;padding:3px 8px;border-radius:6px;white-space:nowrap;letter-spacing:.3px;}
+    .st-exec{background:rgba(79,142,247,.15);color:#93c5fd;}
+    .st-nao{background:rgba(107,114,128,.18);color:#9ca3af;}
+    .st-blq{background:rgba(245,158,11,.16);color:#fcd34d;}
+    .st-sem{background:rgba(107,114,128,.12);color:#6b7280;}
+    .pr-p0{background:rgba(239,68,68,.16);color:#fca5a5;}
+    .pr-p1{background:rgba(245,158,11,.16);color:#fcd34d;}
+    .pr-p2{background:rgba(79,142,247,.14);color:#93c5fd;}
+    .pr-p3{background:rgba(107,114,128,.16);color:#9ca3af;}
+    .pill.atraso{background:rgba(239,68,68,.2);color:#fca5a5;border:1px solid rgba(239,68,68,.35);}
+    .meta{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:11.5px;color:var(--muted);}
+    .meta b{color:var(--text);font-weight:600;}
+    .meta .mono{font-family:'DM Mono',monospace;}
+    .obs{font-size:12px;color:var(--muted);line-height:1.55;border-top:1px dashed var(--border);padding-top:8px;}
+    .obs.clamp{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;cursor:pointer;}
+    .empty{padding:40px;text-align:center;color:var(--muted);font-size:14px;background:var(--surface);border:1px dashed var(--border);border-radius:var(--radius);}
+
+    .note{font-size:12px;color:var(--muted);line-height:1.7;margin-top:8px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 18px;}
+    .note b{color:var(--text);}
+
+    /* Abas */
+    .tabs{display:flex;gap:6px;margin-bottom:20px;border-bottom:1px solid var(--border);padding-bottom:0;}
+    .tab{background:none;border:none;border-bottom:2px solid transparent;color:var(--muted);font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;padding:10px 16px;cursor:pointer;transition:.15s;}
+    .tab:hover{color:var(--text);}
+    .tab.on{color:var(--accent);border-bottom-color:var(--accent);}
+
+    /* Relatório (texto) */
+    .rel-actions{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px;}
+    .btn-export{display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;border:none;border-radius:10px;padding:11px 16px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;transition:opacity .2s,transform .1s;box-shadow:0 4px 14px rgba(79,142,247,.25);white-space:nowrap;}
+    .btn-export:hover{opacity:.92;}
+    .btn-export:active{transform:scale(.97);}
+    .btn-export.ghost{background:var(--surface);color:var(--text);border:1px solid var(--border);box-shadow:none;}
+    .btn-export.ghost:hover{border-color:var(--accent);color:var(--accent);opacity:1;}
+    .rel{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:34px 38px;line-height:1.75;font-size:14.5px;max-width:850px;}
+    .rel h1{font-size:20px;line-height:1.35;margin-bottom:6px;}
+    .rel .rel-data{color:var(--muted);font-size:13px;margin-bottom:22px;}
+    .rel h2{font-size:16px;margin:26px 0 10px;padding-top:18px;border-top:1px solid var(--border);}
+    .rel p{margin-bottom:10px;}
+    .rel ul,.rel ol{margin:0 0 12px 22px;}
+    .rel li{margin-bottom:7px;}
+    .rel strong{color:#fff;font-weight:600;}
+    .rel table{width:100%;border-collapse:collapse;font-size:13px;margin:14px 0 6px;}
+    .rel th{text-align:left;font-size:10.5px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;padding:9px 10px;border-bottom:1px solid var(--border);background:var(--surface2);}
+    .rel th:not(:first-child),.rel td:not(:first-child){text-align:right;font-family:'DM Mono',monospace;}
+    .rel td{padding:8px 10px;border-bottom:1px solid rgba(42,45,58,.5);}
+    .rel tr.tot td{font-weight:700;border-top:1px solid var(--border);color:#93c5fd;}
+    .rel td .atr{color:#fca5a5;font-weight:600;}
+
+    /* Impressão */
+    @media print{
+      body{background:#fff;color:#111;padding:0;}
+      body::before{display:none;}
+      .btn-print,.toolbar,.tabs,.rel-actions{display:none!important;}
+      .kpi,.subcard,.acao,.note{background:#fff;border-color:#ccc;box-shadow:none;}
+      .kpi .n{color:#111!important;}
+      .subcard .nm,.acao .tt,.secsub-h h2,.head h1{color:#111;}
+      .meta b,.note b{color:#111;}
+      .acao{break-inside:avoid;}
+      .secsub{break-inside:avoid-page;}
+      /* imprime só a aba ativa */
+      body[data-view="relatorio"] #view-painel{display:none!important;}
+      body[data-view="relatorio"] .head{display:none;}
+      body[data-view="painel"] #view-relatorio{display:none!important;}
+      .rel{background:#fff;border:none;padding:0;max-width:none;color:#111;font-size:12.5pt;}
+      .rel h1,.rel h2,.rel strong{color:#111;}
+      .rel .rel-data{color:#444;}
+      .rel h2{border-top-color:#ddd;break-after:avoid;}
+      .rel th{background:#f0f0f0;color:#333;}
+      .rel td{border-bottom-color:#ddd;}
+      .rel tr.tot td{color:#111;border-top-color:#999;}
+      .rel td .atr{color:#b91c1c;}
+      .rel table,.rel li{break-inside:avoid;}
+    }
+  </style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="head">
+    <div class="head-l">
+      <div class="logo-icon">
+        <svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+      </div>
+      <div>
+        <h1>Ações em Andamento</h1>
+        <p>Relatório por subsecretaria &middot; <span id="hoje"></span></p>
+      </div>
+    </div>
+    <button class="btn-print" onclick="window.print()">
+      <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V2h12v7M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2M6 14h12v8H6z"/></svg>
+      Imprimir / PDF
+    </button>
+  </div>
+
+  <div class="tabs">
+    <button class="tab on" id="tab-painel" onclick="trocarAba('painel')">Painel dinâmico</button>
+    <button class="tab" id="tab-relatorio" onclick="trocarAba('relatorio')">Relatório</button>
+  </div>
+
+  <div id="view-painel">
+
+  <div class="kpis" id="kpis"></div>
+
+  <div class="subs" id="subs"></div>
+
+  <div class="toolbar">
+    <div class="fgroup">
+      <label>Status</label>
+      <div class="chips" id="chips-status"></div>
+    </div>
+    <div class="fgroup">
+      <label>Prioridade</label>
+      <div class="chips" id="chips-prio"></div>
+    </div>
+    <div class="fgroup" style="flex:1;min-width:200px;">
+      <label>Buscar ação ou responsável</label>
+      <input class="search" id="busca" type="text" placeholder="ex.: uniformes, resolução, Marcos...">
+    </div>
+  </div>
+
+  <div id="report"></div>
+
+  <div class="note">
+    <b>Leitura rápida.</b> Cada cartão é uma ação em andamento na subsecretaria. <b>P0</b> é a prioridade máxima.
+    O selo <b>EM ATRASO</b> é calculado automaticamente: prazo (ou data de término) anterior a hoje sem conclusão registrada.
+    Clique num cartão de subsecretaria para focar só nela; clique na observação para expandir o texto completo.
+  </div>
+
+  </div><!-- /view-painel -->
+
+  <div id="view-relatorio" style="display:none">
+
+    <div class="rel-actions">
+      <button class="btn-export" onclick="window.print()">
+        <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V2h12v7M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2M6 14h12v8H6z"/></svg>
+        Gerar PDF
+      </button>
+      <button class="btn-export ghost" onclick="baixarDocx()">
+        <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6M12 18v-6M9 15l3 3 3-3"/></svg>
+        Baixar DOCX
+      </button>
+    </div>
+
+    <article class="rel" id="rel-doc">
+      <h1>Relatório de Ações em Andamento — Subsecretarias da SME</h1>
+      <p class="rel-data"><strong>Data de referência:</strong> <span class="js-hoje"></span></p>
+
+      <h2>1. Visão Geral</h2>
+      <p>A Secretaria Municipal de Educação acompanha, nesta data, <strong><span id="rv-total"></span> ações</strong> distribuídas entre suas quatro subsecretarias. Do total, <strong><span id="rv-exec"></span> ações (<span id="rv-execpct"></span>%) encontram-se em execução</strong>, <span id="rv-nao"></span> ainda não foram iniciadas, <span id="rv-blq"></span> estão bloqueadas por fatores externos e <span id="rv-sem"></span> aguardam definição de status.</p>
+      <p>Merece atenção o conjunto de <strong><span id="rv-atr"></span> ações com prazo vencido</strong>, concentradas principalmente na Subsecretaria de Licitações e Contratos, conforme detalhado adiante.</p>
+      <table id="rv-tabela">
+        <thead>
+          <tr><th>Subsecretaria</th><th>Ações</th><th>Em execução</th><th>Não iniciadas</th><th>Bloqueadas</th><th>Em atraso</th></tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+
+      <h2>2. Subsecretaria Pedagógica — 24 ações</h2>
+      <p>A subsecretaria concentra o maior volume de ações, majoritariamente de natureza normativa e de organização do ano letivo. Estão <strong>em execução</strong> o Regimento Escolar (comissão já indicada, ofícios a órgãos externos em elaboração), as Resoluções de Avaliação e de Reclassificação, o Monitoramento do Plano Nacional de Educação (em definição das comissões), a organização do CIREM (cerimônia de abertura realizada em 30/04 na Cava do Bosque, término previsto para 20/11) e do Congresso 2026, a Eleição do CAE (minutas da comissão eleitoral e do edital em elaboração), além de Feira do Livro, Grêmios Estudantis, Projetos Extraclasse, Avaliações Externas, PMPI (fase de estabelecimento de metas), Apoios Pedagógicos, acompanhamento de saldo de aulas sem atribuir e professores substitutos.</p>
+      <p><strong>Pontos de atenção:</strong></p>
+      <ul>
+        <li><strong>Reposição de Aulas</strong> encontra-se <strong>bloqueada</strong> desde abril/2025, pendente de alinhamento do fluxo de solicitação;</li>
+        <li>O <strong>Estudo de Caso de 6 estudantes da Educação Especial</strong> teve o prazo de 29/04 <strong>vencido</strong>, demandando repactuação;</li>
+        <li>Cinco ações seguem não iniciadas, com destaque para as Resoluções de Atribuição e de Calendário 2027, cuja elaboração deve ser programada para o segundo semestre.</li>
+      </ul>
+
+      <h2>3. Subsecretaria de Gestão Administrativa, Financeira e Tecnológica — 8 ações</h2>
+      <p>Praticamente toda a carteira está <strong>em execução</strong>, com foco em infraestrutura e contratos: ligação de energia da EEI Jd. Horizonte Verde <strong>(P0)</strong>, substituição das caixas d'água da EMEI João Sperandio e da EMEF Faustino Jarruce <strong>(P0)</strong>, contratação de projetos para reforma de coberturas <strong>(P0)</strong>, contrato de manutenção Atlântica <strong>(P0)</strong> e contratação de empresa para manutenção de ar condicionado (P2).</p>
+      <p><strong>Ponto de atenção:</strong> a contratação de <strong>empresa de prestação de serviços de TI (P0)</strong> está sem status definido, com pendência de verificação registrada.</p>
+
+      <h2>4. Subsecretaria de Alimentação Escolar, Logística e Materiais — 2 ações</h2>
+      <ul>
+        <li><strong>Chamada Pública Hortifrúti (P0, em execução, prazo 30/11):</strong> a SME é obrigada a aplicar 45% da verba PNAE na agricultura familiar; a equipe <strong>sinaliza risco de descumprimento</strong> em razão da morosidade dos processos de compra.</li>
+        <li><strong>Chamada Pública de Não Perecíveis — Arroz (P0, bloqueada):</strong> em investigação denúncia de terceiro interessado sobre a não produção de arroz no município de Promissão; a Subsecretaria de Licitações oficiou a Secretaria de Agricultura, <strong>sem resposta até o momento</strong>.</li>
+      </ul>
+
+      <h2>5. Subsecretaria de Licitações e Contratos — 11 ações</h2>
+      <p>É a carteira com maior incidência de prazos vencidos (<strong>6 ações em atraso</strong>), recomendando-se priorização na repactuação de cronogramas:</p>
+      <ul>
+        <li><strong>Licitação da construção da Escola João Rossi (P0, prazo 01/05):</strong> aguarda atualização de documentos da Caixa pela Gerência de Obras e Governo para republicação;</li>
+        <li><strong>Novo modelo de contrato de Transportes (P0, prazo 01/07):</strong> planejamento iniciado em 16/04 com os responsáveis técnicos;</li>
+        <li><strong>Projeto de Modernização das Piscinas (P2, prazo 01/07):</strong> requer anteprojeto para contratação do aquecimento de 2 piscinas;</li>
+        <li><strong>Manutenção de Ar Condicionado — PMRP (P2)</strong> e <strong>Transporte de Bebês (P1)</strong>, ambos com prazo em 01/07, ainda não iniciados;</li>
+        <li><strong>Uniformes dos 9ºs anos (P2, prazo 30/05):</strong> não iniciada, pendente definição da forma de contratação e custo.</li>
+      </ul>
+      <p>Seguem dentro do prazo: novo modelo de Alimentação Escolar (P1, prazo 01/08), SRP de Pintura Predial e Anteprojetos de Engenharia (prazo 01/12) e a PPP/Assessoria Caixa para o Ensino Infantil (P2, prazo 02/2027, em levantamento inicial).</p>
+
+      <h2>6. Encaminhamentos Recomendados</h2>
+      <ol>
+        <li><strong>Repactuar os prazos</strong> das ações vencidas, com prioridade para as P0 (Escola João Rossi e contrato de Transportes);</li>
+        <li><strong>Destravar os bloqueios:</strong> fluxo de reposição de aulas (Pedagógica) e resposta da Secretaria de Agricultura sobre a chamada pública do arroz (Alimentação);</li>
+        <li><strong>Monitorar o risco PNAE</strong> da chamada pública Hortifrúti, dado o percentual obrigatório de 45% da agricultura familiar;</li>
+        <li><strong>Definir status e responsável</strong> da contratação de serviços de TI;</li>
+        <li><strong>Programar o início</strong> das resoluções de Atribuição e Calendário 2027 e das demais ações não iniciadas com prazo no 2º semestre.</li>
+      </ol>
+    </article>
+
+  </div><!-- /view-relatorio -->
+
+</div>
+
+<script>
+const ACOES = [
+  {"sub":"SUBSECRETARIA PEDAGÓGICA","desc":"REGIMENTO ESCOLAR","prio":"","resp":"SUBSECRETARIA PEDAGÓGICA","resp2":"GERÊNCIA DE SUPERVISÃO DE ENSINO","status":"Em execução","ini":"2026-02-12","fim":"","obs":"Já foi indicada a comissão/Em fase de ofício para orgãos externos/ Reuniões para estudo em Abril","prazo":"","venc":""},
+  {"sub":"SUBSECRETARIA PEDAGÓGICA","desc":"RESOLUÇÃO DA AVALIAÇÃO","prio":"","resp":"SUBSECRETARIA PEDAGÓGICA","resp2":"GERÊNCIA DE GESTÃO PEDAGÓGICA","status":"Em execução","ini":"","fim":"","obs":"","prazo":"","venc":""},
+  {"sub":"SUBSECRETARIA PEDAGÓGICA","desc":"RESOLUÇÃO DE RECLASSIFICAÇÃO","prio":"","resp":"SUBSECRETARIA PEDAGÓGICA","resp2":"GERÊNCIA DE SUPERVISÃO DE ENSINO","status":"Em execução","ini":"","fim":"","obs":"","prazo":"","venc":""},
+  {"sub":"SUBSECRETARIA PEDAGÓGICA","desc":"RESOLUÇÃO DO TDC","prio":"","resp":"SUBSECRETARIA PEDAGÓGICA","resp2":"GERÊNCIA DO CENTRO DE FORMAÇÃO PAULO FREIRE","status":"Não iniciada","ini":"","fim":"","obs":"","prazo":"","venc":""},
+  {"sub":"SUBSECRETARIA PEDAGÓGICA","desc":"ORGANIZAÇÃO DOS POLOS 1º SEMESTRE","prio":"","resp":"SUBSECRETARIA PEDAGÓGICA","resp2":"GERÊNCIA DE EDUCAÇÃO INFANTIL","status":"Em execução","ini":"","fim":"","obs":"","prazo":"","venc":""},
+  {"sub":"SUBSECRETARIA PEDAGÓGICA","desc":"ORGANIZAÇÃO DOS POLOS DE JANEIRO","prio":"","resp":"SUBSECRETARIA PEDAGÓGICA","resp2":"GERÊNCIA DE EDUCAÇÃO INFANTIL","status":"Não iniciada","ini":"","fim":"","obs":"","prazo":"","venc":""},
+  {"sub":"SUBSECRETARIA PEDAGÓGICA","desc":"MONITORAMENTO DO PLANO NACIONAL DE EDUCAÇÃO","prio":"","resp":"SUBSECRETARIA PEDAGÓGICA","resp2":"VALERIA FERNANDES TURCI","status":"Em execução","ini":"","fim":"","obs":"Definição das comissões de monitoramento","prazo":"","venc":""},
+  {"sub":"SUBSECRETARIA PEDAGÓGICA","desc":"RESOLUÇÃO DA ATRIBUIÇÃO 2027","prio":"","resp":"SUBSECRETARIA PEDAGÓGICA","resp2":"GERÊNCIA DE ATRIBUIÇÃO DE AULAS","status":"Não iniciada","ini":"","fim":"","obs":"","prazo":"","venc":""},
+  {"sub":"SUBSECRETARIA PEDAGÓGICA","desc":"RESOLUÇÃO CALENDÁRIO 2027","prio":"","resp":"SUBSECRETARIA PEDAGÓGICA","resp2":"GERÊNCIA DE GESTÃO PEDAGÓGICA","status":"Não iniciada","ini":"","fim":"","obs":"","prazo":"","venc":""},
+  {"sub":"SUBSECRETARIA PEDAGÓGICA","desc":"ORGANIZAÇÃO DO CONGRESSO 2026","prio":"","resp":"SUBSECRETARIA PEDAGÓGICA","resp2":"GERÊNCIA DE GESTÃO PEDAGÓGICA","status":"Em execução","ini":"","fim":"","obs":"Os levantamentos de valores cobrados pelos palestrantes têm o prazo de apresentação ao Julio Aires até o dia 27/04/2026.","prazo":"","venc":""},
+  {"sub":"SUBSECRETARIA PEDAGÓGICA","desc":"CIREM","prio":"","resp":"SUBSECRETARIA PEDAGÓGICA","resp2":"GUILHERME MANTOVAN DE ALMEIDA","status":"Em execução","ini":"2026-04-30","fim":"2026-11-20","obs":"Cerimônia de abertura a ser realizada em 30/04 na Cava do Bosque","prazo":"","venc":"NÃO"},
+  {"sub":"SUBSECRETARIA PEDAGÓGICA","desc":"PROJETOS EXTRACLASSE","prio":"","resp":"SUBSECRETARIA PEDAGÓGICA","resp2":"ANDRE GOMES VENTURA GONCALVES","status":"Em execução","ini":"","fim":"","obs":"","prazo":"","venc":""},
+  {"sub":"SUBSECRETARIA PEDAGÓGICA","desc":"FEIRA DO LIVRO","prio":"","resp":"SUBSECRETARIA PEDAGÓGICA","resp2":"ANDRE GOMES VENTURA GONCALVES","status":"Em execução","ini":"","fim":"","obs":"","prazo":"","venc":""},
+  {"sub":"SUBSECRETARIA PEDAGÓGICA","desc":"ELEIÇÃO DO CAE","prio":"","resp":"SUBSECRETARIA PEDAGÓGICA","resp2":"GERÊNCIA DE GESTÃO DEMOCRÁTICA","status":"Em execução","ini":"","fim":"","obs":"Minuta da Comissão eleitoral e Minuta do Edital. Todas as demais ações ficam a cargo da Subsecretaria de Alimentação.","prazo":"","venc":""},
+  {"sub":"SUBSECRETARIA PEDAGÓGICA","desc":"GREMIOS ESTUDANTIS","prio":"","resp":"SUBSECRETARIA PEDAGÓGICA","resp2":"GERÊNCIA DE GESTÃO DEMOCRÁTICA","status":"Em execução","ini":"","fim":"","obs":"","prazo":"","venc":""},
+  {"sub":"SUBSECRETARIA PEDAGÓGICA","desc":"AVALIAÇÕES EXTERNAS","prio":"","resp":"SUBSECRETARIA PEDAGÓGICA","resp2":"GERÊNCIA DE GESTÃO PEDAGÓGICA","status":"Em execução","ini":"","fim":"","obs":"","prazo":"","venc":""},
+  {"sub":"SUBSECRETARIA PEDAGÓGICA","desc":"REPOSIÇÃO DE AULAS","prio":"","resp":"SUBSECRETARIA PEDAGÓGICA","resp2":"GERÊNCIA DE ENSINO FUNDAMENTAL","status":"Bloqueada","ini":"2025-04-22","fim":"","obs":"Alinhamento do fluxo de solicitação","prazo":"","venc":""},
+  {"sub":"SUBSECRETARIA PEDAGÓGICA","desc":"PMPI","prio":"","resp":"SUBSECRETARIA PEDAGÓGICA","resp2":"FERNANDA MARIA DE OLIVEIRA","status":"Em execução","ini":"","fim":"","obs":"Está em fase de estabelecimento das metas","prazo":"","venc":""},
+  {"sub":"SUBSECRETARIA PEDAGÓGICA","desc":"EDUCAÇÃO ESPECIAL - ESTUDO DE CASO 6 ESTUDANTES","prio":"","resp":"SUBSECRETARIA PEDAGÓGICA","resp2":"GERÊNCIA DE EDUCAÇÃO ESPECIAL","status":"Em execução","ini":"","fim":"2026-04-29","obs":"","prazo":"","venc":"SIM"},
+  {"sub":"SUBSECRETARIA PEDAGÓGICA","desc":"APOIOS PEDAGÓGICOS","prio":"","resp":"SUBSECRETARIA PEDAGÓGICA","resp2":"GERÊNCIA DE EDUCAÇÃO ESPECIAL","status":"Em execução","ini":"","fim":"","obs":"","prazo":"","venc":""},
+  {"sub":"SUBSECRETARIA PEDAGÓGICA","desc":"ACOMPANHAMENTO DE SALDO AULAS SEM ATRIBUIR","prio":"","resp":"SUBSECRETARIA PEDAGÓGICA","resp2":"GERÊNCIA DE ATRIBUIÇÃO DE AULAS","status":"Em execução","ini":"","fim":"","obs":"","prazo":"","venc":""},
+  {"sub":"SUBSECRETARIA PEDAGÓGICA","desc":"BOAS PRÁTICAS","prio":"","resp":"SUBSECRETARIA PEDAGÓGICA","resp2":"GERÊNCIA DE GESTÃO PEDAGÓGICA","status":"Não iniciada","ini":"","fim":"","obs":"","prazo":"","venc":""},
+  {"sub":"SUBSECRETARIA PEDAGÓGICA","desc":"PROFESSORES SUBSTITUTOS","prio":"","resp":"SUBSECRETARIA PEDAGÓGICA","resp2":"GERÊNCIA DE ATRIBUIÇÃO DE AULAS","status":"Em execução","ini":"","fim":"","obs":"","prazo":"","venc":""},
+  {"sub":"SUBSECRETARIA PEDAGÓGICA","desc":"PLANO DE AÇÃO AVALIAÇÕES EXTERNAS","prio":"","resp":"SUBSECRETARIA PEDAGÓGICA","resp2":"GERÊNCIA DE GESTÃO PEDAGÓGICA","status":"Sem status","ini":"","fim":"","obs":"","prazo":"","venc":""},
+  {"sub":"SUBSECRETARIA DE GESTÃO ADMINISTRATIVA, FINANCEIRA E TECNOLÓGICA","desc":"Ligação de energia EEI Jd. Horizonte Verde","prio":"P0","resp":"Marcos","resp2":"Licitação","status":"Em execução","ini":"2026-03-19","fim":"","obs":"","prazo":"","venc":""},
+  {"sub":"SUBSECRETARIA DE GESTÃO ADMINISTRATIVA, FINANCEIRA E TECNOLÓGICA","desc":"Contratação de empresa para manutenção de ar condicionado","prio":"P2","resp":"Marcos","resp2":"Licitação","status":"Em execução","ini":"2025-11-06","fim":"","obs":"","prazo":"","venc":""},
+  {"sub":"SUBSECRETARIA DE GESTÃO ADMINISTRATIVA, FINANCEIRA E TECNOLÓGICA","desc":"Contratação de projetos para reforma das coberturas","prio":"P0","resp":"Marcos","resp2":"Licitação","status":"Em execução","ini":"2025-11-27","fim":"","obs":"","prazo":"","venc":""},
+  {"sub":"SUBSECRETARIA DE GESTÃO ADMINISTRATIVA, FINANCEIRA E TECNOLÓGICA","desc":"Substituição caixa d'água EMEI João Sperandio","prio":"P0","resp":"Marcos","resp2":"Licitação","status":"Em execução","ini":"2026-01-23","fim":"","obs":"","prazo":"","venc":""},
+  {"sub":"SUBSECRETARIA DE GESTÃO ADMINISTRATIVA, FINANCEIRA E TECNOLÓGICA","desc":"Substituição caixa d'água EMEF Faustino Jarruce","prio":"P0","resp":"Marcos","resp2":"Licitação","status":"Em execução","ini":"2026-03-23","fim":"","obs":"","prazo":"","venc":""},
+  {"sub":"SUBSECRETARIA DE GESTÃO ADMINISTRATIVA, FINANCEIRA E TECNOLÓGICA","desc":"Contrato de Manutenção Atlântica","prio":"P0","resp":"Marcos","resp2":"Licitação","status":"Em execução","ini":"2026-03-27","fim":"","obs":"","prazo":"","venc":""},
+  {"sub":"SUBSECRETARIA DE GESTÃO ADMINISTRATIVA, FINANCEIRA E TECNOLÓGICA","desc":"Empresa de prestação de serviços de TI","prio":"P0","resp":"Tarcísio","resp2":"Licitação","status":"Sem status","ini":"","fim":"","obs":"Verificar com Matheus","prazo":"","venc":""},
+  {"sub":"SUBSECRETARIA DE GESTÃO ADMINISTRATIVA, FINANCEIRA E TECNOLÓGICA","desc":"Ata empresa Atlântica","prio":"","resp":"Marcos","resp2":"Licitação","status":"Em execução","ini":"","fim":"","obs":"","prazo":"","venc":""},
+  {"sub":"SUBSECRETARIA DE ALIMENTAÇÃO ESCOLAR, LOGÍSTICA E MATERIAIS","desc":"CHAMADA PÚBLICA HORTIFRÚTI","prio":"P0","resp":"RENATA FERNANDA BENEDITO","resp2":"GERÊNCIA DE NUTRIÇÃO ESCOLAR","status":"Em execução","ini":"2026-05-01","fim":"","obs":"A SME é obrigada a comprar 45% da verba PNAE da agricultura familiar, porém estamos em alerta já prevendo que não será possível devido à morosidade dos processos de compra (chamada pública).","prazo":"2026-11-30","venc":""},
+  {"sub":"SUBSECRETARIA DE ALIMENTAÇÃO ESCOLAR, LOGÍSTICA E MATERIAIS","desc":"CHAMADA PÚBLICA NÃO PERECÍVEIS (ARROZ)","prio":"P0","resp":"RENATA FERNANDA BENEDITO","resp2":"GERÊNCIA DE NUTRIÇÃO ESCOLAR","status":"Bloqueada","ini":"2026-03-19","fim":"","obs":"Iniciou-se a demanda para investigação sobre denúncia de terceiro interessado, sobre a não produção de arroz no município de Promissão. A Subsecretaria de Licitação enviou e-mail para a Secretaria de Agricultura, não obtendo resposta até o momento.","prazo":"","venc":""},
+  {"sub":"SUBSECRETARIA DE LICITAÇÕES E CONTRATOS","desc":"Planejamento novo Modelo Contrato Transportes","prio":"P0","resp":"SUBSECRETARIA DE LICITAÇÕES E CONTRATOS","resp2":"SUBSECRETARIA DE ALIMENTAÇÃO ESCOLAR, LOGÍSTICA E MATERIAIS","status":"Em execução","ini":"2026-04-16","fim":"","obs":"Início da etapa de planejamento, com reunião inicial agendada para 16.04 junto aos responsáveis técnicos e administrativos pela demanda","prazo":"2026-07-01","venc":""},
+  {"sub":"SUBSECRETARIA DE LICITAÇÕES E CONTRATOS","desc":"Planejamento novo Modelo Alimentação Escolar","prio":"P1","resp":"SUBSECRETARIA DE LICITAÇÕES E CONTRATOS","resp2":"SUBSECRETARIA DE ALIMENTAÇÃO ESCOLAR, LOGÍSTICA E MATERIAIS","status":"Não iniciada","ini":"","fim":"","obs":"Levantamento de dados para subsídios de novo modelo pretendido","prazo":"2026-08-01","venc":""},
+  {"sub":"SUBSECRETARIA DE LICITAÇÕES E CONTRATOS","desc":"Projeto Modernização Piscinas - 2025/213513","prio":"P2","resp":"GERÊNCIA DE OBRAS E MANUTENÇÃO","resp2":"SUBSECRETARIA DE LICITAÇÕES E CONTRATOS","status":"Em execução","ini":"2026-07-01","fim":"","obs":"Necessária elaboração de Anteprojeto visando subsidiar contratação da execução de aquecimento de 2 piscinas","prazo":"2026-07-01","venc":""},
+  {"sub":"SUBSECRETARIA DE LICITAÇÕES E CONTRATOS","desc":"Planejamento SRP Pintura Predial - 2026/059139","prio":"P3","resp":"GERÊNCIA DE OBRAS E MANUTENÇÃO","resp2":"SUBSECRETARIA DE LICITAÇÕES E CONTRATOS","status":"Não iniciada","ini":"","fim":"","obs":"Levantamento junto a Obras - Tipos de serviços e estimativos","prazo":"2026-12-01","venc":""},
+  {"sub":"SUBSECRETARIA DE LICITAÇÕES E CONTRATOS","desc":"Contratação Empresa elaboração Anteprojetos Engenharia","prio":"P1","resp":"GERÊNCIA DE OBRAS E MANUTENÇÃO","resp2":"SUBSECRETARIA DE LICITAÇÕES E CONTRATOS","status":"Não iniciada","ini":"","fim":"","obs":"Levantamento junto a Obras - Tipos de serviços e estimativos","prazo":"2026-12-01","venc":""},
+  {"sub":"SUBSECRETARIA DE LICITAÇÕES E CONTRATOS","desc":"Manutenção Ar Condicionado - PMRP 2026/060914","prio":"P2","resp":"GERÊNCIA DE OBRAS E MANUTENÇÃO","resp2":"SUBSECRETARIA DE LICITAÇÕES E CONTRATOS","status":"Não iniciada","ini":"","fim":"","obs":"Levantamento junto a Obras - Tipos de serviços e estimativos","prazo":"2026-07-01","venc":""},
+  {"sub":"SUBSECRETARIA DE LICITAÇÕES E CONTRATOS","desc":"Planejamento contratação Transporte Bebês 2026/059264","prio":"P1","resp":"SUBSECRETARIA DE ALIMENTAÇÃO ESCOLAR, LOGÍSTICA E MATERIAIS","resp2":"SUBSECRETARIA DE LICITAÇÕES E CONTRATOS","status":"Não iniciada","ini":"","fim":"","obs":"Levantamento demanda reprimida e Modelo","prazo":"2026-07-01","venc":""},
+  {"sub":"SUBSECRETARIA DE LICITAÇÕES E CONTRATOS","desc":"Licitação Construção Escola - João Rossi","prio":"P0","resp":"SUBSECRETARIA DE LICITAÇÕES E CONTRATOS","resp2":"GERÊNCIA DE OBRAS E MANUTENÇÃO","status":"Em execução","ini":"2026-01-29","fim":"","obs":"Aguardando atualização Ger. de Obras e Governo de documentos da Caixa, para republicação","prazo":"2026-05-01","venc":""},
+  {"sub":"SUBSECRETARIA DE LICITAÇÕES E CONTRATOS","desc":"PPP - Assessoria Caixa - Ensino Infantil","prio":"P2","resp":"SUBSECRETARIA DE LICITAÇÕES E CONTRATOS","resp2":"SUBSECRETARIA PEDAGÓGICA","status":"Em execução","ini":"2026-04-13","fim":"","obs":"Início dos trabalhos, em levantamento prévio de informações e definição de equipe de acompanhamento","prazo":"2027-02-01","venc":""},
+  {"sub":"SUBSECRETARIA DE LICITAÇÕES E CONTRATOS","desc":"Uniformes para nonos anos - estampas por unidades escolares","prio":"P2","resp":"MATHEUS DE BARROS RAMOS PROSPERO","resp2":"SUBSECRETARIA DE LICITAÇÕES E CONTRATOS","status":"Não iniciada","ini":"2026-05-07","fim":"","obs":"Verificar a forma de contratação e custo","prazo":"2026-05-30","venc":""},
+  {"sub":"SUBSECRETARIA DE LICITAÇÕES E CONTRATOS","desc":"Uniformes CIREM","prio":"","resp":"Comissão Cirem","resp2":"MATHEUS DE BARROS RAMOS PROSPERO","status":"Não iniciada","ini":"","fim":"","obs":"","prazo":"","venc":""}
+];
+
+const SUBMETA = {
+  "SUBSECRETARIA PEDAGÓGICA":{curto:"Pedagógica",cor:"var(--c-ped)"},
+  "SUBSECRETARIA DE GESTÃO ADMINISTRATIVA, FINANCEIRA E TECNOLÓGICA":{curto:"Gestão Adm., Financeira e Tecnológica",cor:"var(--c-adm)"},
+  "SUBSECRETARIA DE ALIMENTAÇÃO ESCOLAR, LOGÍSTICA E MATERIAIS":{curto:"Alimentação Escolar, Logística e Materiais",cor:"var(--c-ali)"},
+  "SUBSECRETARIA DE LICITAÇÕES E CONTRATOS":{curto:"Licitações e Contratos",cor:"var(--c-lic)"},
+};
+const SUBS = Object.keys(SUBMETA);
+const STATUS = ["Todos","Em execução","Não iniciada","Bloqueada","Sem status"];
+const PRIOS = ["Todas","P0","P1","P2","P3"];
+
+let fSub = "Todas";
+let fStatus = "Todos";
+let fPrio = "Todas";
+let fBusca = "";
+
+const hojeISO = new Date().toISOString().slice(0,10);
+const fmtData = iso => { if(!iso) return ""; const [a,m,d]=iso.split("-"); return `${d}/${m}/${a}`; };
+const stClass = s => s==="Em execução"?"st-exec":s==="Não iniciada"?"st-nao":s==="Bloqueada"?"st-blq":"st-sem";
+const atrasada = a => a.venc==="SIM" || (( a.prazo || a.fim ) && (a.prazo||a.fim) < hojeISO);
+const respDe = a => a.resp===a.sub ? a.resp2 : a.resp;
+const respSec = a => a.resp===a.sub ? "" : (a.resp2||"");
+
+function filtrar(){
+  return ACOES.filter(a=>{
+    if(fSub!=="Todas" && a.sub!==fSub) return false;
+    if(fStatus!=="Todos" && a.status!==fStatus) return false;
+    if(fPrio!=="Todas" && a.prio!==fPrio) return false;
+    if(fBusca){
+      const alvo = (a.desc+" "+a.resp+" "+a.resp2+" "+a.obs).toLowerCase();
+      if(!alvo.includes(fBusca)) return false;
+    }
+    return true;
+  });
+}
+
+function renderKpis(){
+  const arr = filtrar();
+  const n = arr.length;
+  const ex = arr.filter(a=>a.status==="Em execução").length;
+  const ni = arr.filter(a=>a.status==="Não iniciada").length;
+  const bl = arr.filter(a=>a.status==="Bloqueada").length;
+  const at = arr.filter(atrasada).length;
+  document.getElementById("kpis").innerHTML = `
+    <div class="kpi"><div class="n">${n}</div><div class="l">Ações no total</div></div>
+    <div class="kpi exec"><div class="n">${ex}</div><div class="l">Em execução</div></div>
+    <div class="kpi nao"><div class="n">${ni}</div><div class="l">Não iniciadas</div></div>
+    <div class="kpi blq"><div class="n">${bl}</div><div class="l">Bloqueadas</div></div>
+    <div class="kpi atr"><div class="n">${at}</div><div class="l">Em atraso</div></div>`;
+}
+
+function renderSubs(){
+  document.getElementById("subs").innerHTML = SUBS.map(s=>{
+    const meta = SUBMETA[s];
+    const arr = ACOES.filter(a=>a.sub===s);
+    const ex = arr.filter(a=>a.status==="Em execução").length;
+    const at = arr.filter(atrasada).length;
+    const pct = arr.length? Math.round(ex/arr.length*100) : 0;
+    return `<div class="subcard ${fSub===s?'on':''}" style="--sc:${meta.cor}" data-sub="${s}">
+      <div class="nm">${meta.curto}</div>
+      <div class="ct">
+        <span><b>${arr.length}</b> ações</span>
+        <span><b>${ex}</b> em execução</span>
+        ${at?`<span style="color:#fca5a5"><b style="color:#fca5a5">${at}</b> em atraso</span>`:""}
+      </div>
+      <div class="pb"><i style="width:${pct}%"></i></div>
+    </div>`;
+  }).join("");
+  document.querySelectorAll("[data-sub]").forEach(c=>c.onclick=()=>{
+    fSub = (fSub===c.dataset.sub) ? "Todas" : c.dataset.sub;
+    render();
+  });
+}
+
+function renderChips(){
+  document.getElementById("chips-status").innerHTML = STATUS.map(s=>
+    `<button class="chip ${s===fStatus?'on':''}" data-st="${s}">${s}</button>`).join("");
+  document.getElementById("chips-prio").innerHTML = PRIOS.map(p=>
+    `<button class="chip ${p===fPrio?'on':''}" data-pr="${p}">${p}</button>`).join("");
+  document.querySelectorAll("[data-st]").forEach(b=>b.onclick=()=>{fStatus=b.dataset.st;render();});
+  document.querySelectorAll("[data-pr]").forEach(b=>b.onclick=()=>{fPrio=b.dataset.pr;render();});
+}
+
+function cardAcao(a, cor){
+  const atr = atrasada(a);
+  const pills = [];
+  pills.push(`<span class="pill ${stClass(a.status)}">${a.status}</span>`);
+  if(a.prio) pills.push(`<span class="pill pr-${a.prio.toLowerCase()}">${a.prio}</span>`);
+  if(atr) pills.push(`<span class="pill atraso">EM ATRASO</span>`);
+  const metas = [];
+  const r1 = respDe(a), r2 = respSec(a);
+  if(r1) metas.push(`Responsável: <b>${r1}</b>`);
+  if(r2 && r2!==r1) metas.push(`Apoio: <b>${r2}</b>`);
+  if(a.ini) metas.push(`Início: <b class="mono">${fmtData(a.ini)}</b>`);
+  const ref = a.prazo || a.fim;
+  if(ref) metas.push(`${a.prazo?'Prazo':'Término'}: <b class="mono" ${atr?'style="color:#fca5a5"':''}>${fmtData(ref)}</b>`);
+  return `<div class="acao" style="--sc:${cor}">
+    <div class="top"><div class="tt">${a.desc}</div><div class="pills">${pills.join("")}</div></div>
+    <div class="meta">${metas.join(" · ")||'<span style="opacity:.5">Sem detalhes registrados</span>'}</div>
+    ${a.obs?`<div class="obs clamp" onclick="this.classList.toggle('clamp')">${a.obs}</div>`:""}
+  </div>`;
+}
+
+function renderReport(){
+  const arr = filtrar();
+  const el = document.getElementById("report");
+  if(!arr.length){ el.innerHTML = `<div class="empty">Nenhuma ação encontrada com os filtros atuais.</div>`; return; }
+  el.innerHTML = SUBS.map(s=>{
+    const meta = SUBMETA[s];
+    const doSub = arr.filter(a=>a.sub===s);
+    if(!doSub.length) return "";
+    // ordena: atrasadas primeiro, depois P0..P3, depois em execução
+    const rank = a => (atrasada(a)?0:1)*100 + (a.prio? +a.prio[1] : 9)*10 + (a.status==="Em execução"?0:a.status==="Bloqueada"?1:2);
+    doSub.sort((x,y)=>rank(x)-rank(y));
+    return `<div class="secsub">
+      <div class="secsub-h" style="--sc:${meta.cor}">
+        <span class="dot"></span>
+        <h2>${meta.curto}</h2>
+        <span class="cnt">${doSub.length} ${doSub.length===1?'ação':'ações'}</span>
+      </div>
+      <div class="grid">${doSub.map(a=>cardAcao(a, meta.cor)).join("")}</div>
+    </div>`;
+  }).join("");
+}
+
+function render(){
+  renderKpis();
+  renderSubs();
+  renderChips();
+  renderReport();
+}
+
+document.getElementById("busca").oninput = e=>{ fBusca=e.target.value.trim().toLowerCase(); render(); };
+document.getElementById("hoje").textContent = "atualizado em " + fmtData(hojeISO);
+
+/* ---------- Abas ---------- */
+function trocarAba(v){
+  document.body.dataset.view = v;
+  document.getElementById("view-painel").style.display = v==="painel" ? "" : "none";
+  document.getElementById("view-relatorio").style.display = v==="relatorio" ? "" : "none";
+  document.getElementById("tab-painel").classList.toggle("on", v==="painel");
+  document.getElementById("tab-relatorio").classList.toggle("on", v==="relatorio");
+}
+document.body.dataset.view = "painel";
+
+/* ---------- Números dinâmicos do relatório ---------- */
+function preencherRelatorio(){
+  const tot = ACOES.length;
+  const ex  = ACOES.filter(a=>a.status==="Em execução").length;
+  const ni  = ACOES.filter(a=>a.status==="Não iniciada").length;
+  const bl  = ACOES.filter(a=>a.status==="Bloqueada").length;
+  const sm  = ACOES.filter(a=>a.status==="Sem status").length;
+  const at  = ACOES.filter(atrasada).length;
+  const set = (id,v)=>{ document.getElementById(id).textContent = v; };
+  set("rv-total",tot); set("rv-exec",ex); set("rv-execpct",Math.round(ex/tot*100));
+  set("rv-nao",ni); set("rv-blq",bl); set("rv-sem",sm); set("rv-atr",at);
+  document.querySelectorAll(".js-hoje").forEach(e=>{
+    e.textContent = new Date().toLocaleDateString("pt-BR",{day:"numeric",month:"long",year:"numeric"});
+  });
+  const tb = document.querySelector("#rv-tabela tbody");
+  tb.innerHTML = SUBS.map(s=>{
+    const arr = ACOES.filter(a=>a.sub===s);
+    const e2=arr.filter(a=>a.status==="Em execução").length;
+    const n2=arr.filter(a=>a.status==="Não iniciada").length;
+    const b2=arr.filter(a=>a.status==="Bloqueada").length;
+    const a2=arr.filter(atrasada).length;
+    return `<tr><td>${SUBMETA[s].curto}</td><td>${arr.length}</td><td>${e2||"—"}</td><td>${n2||"—"}</td><td>${b2||"—"}</td><td>${a2?`<span class="atr">${a2}</span>`:"—"}</td></tr>`;
+  }).join("") + `<tr class="tot"><td>Total</td><td>${tot}</td><td>${ex}</td><td>${ni}</td><td>${bl}</td><td>${at}</td></tr>`;
+}
+
+/* ---------- DOCX (HTML compatível com Word) ---------- */
+function baixarDocx(){
+  const corpo = document.getElementById("rel-doc").innerHTML;
+  const html = `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">
+<head><meta charset="utf-8"><title>Relatório de Ações em Andamento</title>
+<!--[if gte mso 9]><xml><w:WordDocument><w:View>Print</w:View><w:Zoom>100</w:Zoom></w:WordDocument></xml><![endif]-->
+<style>
+  @page{size:A4;margin:2.5cm 2cm;}
+  body{font-family:Calibri,Arial,sans-serif;font-size:11pt;line-height:1.5;color:#111;}
+  h1{font-size:16pt;color:#1f3864;margin:0 0 4pt;}
+  h2{font-size:13pt;color:#1f3864;margin:16pt 0 6pt;border-bottom:1pt solid #ccc;padding-bottom:2pt;}
+  p{margin:0 0 8pt;}
+  ul,ol{margin:0 0 10pt 20pt;}
+  li{margin-bottom:4pt;}
+  table{border-collapse:collapse;width:100%;font-size:10pt;margin:8pt 0;}
+  th{background:#1f3864;color:#fff;padding:5pt 7pt;text-align:left;border:1pt solid #1f3864;}
+  th:not(:first-child),td:not(:first-child){text-align:right;}
+  td{padding:4pt 7pt;border:1pt solid #ccc;}
+  tr.tot td{font-weight:bold;background:#eef3ff;}
+  .atr{color:#b91c1c;font-weight:bold;}
+  .rel-data{color:#555;}
+</style></head><body>${corpo}</body></html>`;
+  const blob = new Blob(["﻿"+html], {type:"application/msword;charset=utf-8"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = "relatorio-acoes-subsecretarias.doc";
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url), 1500);
+}
+
+render();
+preencherRelatorio();
+</script>
+</body>
+</html>
