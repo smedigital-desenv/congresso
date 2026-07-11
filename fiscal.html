@@ -35,6 +35,8 @@
     label{display:block;font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px;}
     input{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:13px 16px;font-size:15px;font-family:'DM Sans',sans-serif;color:var(--text);outline:none;transition:border-color .2s,box-shadow .2s;}
     input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(79,142,247,.15);}
+    select{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:13px 16px;font-size:15px;font-family:'DM Sans',sans-serif;color:var(--text);outline:none;cursor:pointer;transition:border-color .2s;}
+    select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(79,142,247,.15);}
     .btn{width:100%;padding:14px;border:none;border-radius:10px;font-size:15px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;transition:opacity .2s,transform .1s;margin-top:14px;}
     .btn:active{transform:scale(.98);}
     .btn:disabled{opacity:.45;cursor:not-allowed;transform:none;}
@@ -76,15 +78,26 @@
 
   <div id="etapa-token">
     <div class="card">
-      <div id="leitor"></div>
-      <p class="dica">Aponte para o QR Code do participante</p>
-      <div class="cache-status" id="cacheStatus"></div>
-      <div class="msg" id="msgLeitor"></div>
+      <label for="stationSelect">Palestra onde voce esta</label>
+      <select id="stationSelect" onchange="setStationFiscal()">
+        <option value="">— selecione a palestra —</option>
+      </select>
     </div>
-    <div class="card">
-      <label for="inputToken">Ou digite o token manualmente</label>
-      <input type="text" id="inputToken" placeholder="Ex: EVT000001" autocomplete="off" autocapitalize="characters"/>
-      <button class="btn btn-primary" onclick="irParaValidar()">Validar presenca</button>
+    <div class="card" id="scannerPrompt" style="display:none;text-align:center;color:var(--muted);font-size:13px;line-height:1.6;">
+      Selecione acima a palestra onde voce esta para liberar a leitura do QR Code.
+    </div>
+    <div id="scannerArea" style="display:none">
+      <div class="card">
+        <div id="leitor"></div>
+        <p class="dica">Aponte para o QR Code do participante</p>
+        <div class="cache-status" id="cacheStatus"></div>
+        <div class="msg" id="msgLeitor"></div>
+      </div>
+      <div class="card">
+        <label for="inputToken">Ou digite o token manualmente</label>
+        <input type="text" id="inputToken" placeholder="Ex: 40119 ou 35214_M" autocomplete="off" autocapitalize="characters"/>
+        <button class="btn btn-primary" onclick="irParaValidar()">Validar presenca</button>
+      </div>
     </div>
   </div>
 </div>
@@ -95,6 +108,7 @@
   var KEY_CACHE    = "participantes_cache";
   var KEY_CACHE_DT = "participantes_cache_data";
   var html5QrCode  = null;
+  var emailAtual   = "";
 
   function supaHeaders() {
     return { "apikey": SUPA_KEY, "Authorization": "Bearer " + SUPA_KEY, "Accept-Profile": SUPA_SCHEMA, "Content-Profile": SUPA_SCHEMA };
@@ -133,15 +147,62 @@
   }
 
   function iniciarSessao(email, nome) {
+    emailAtual = email;
     document.getElementById("bar-email").textContent    = nome || email;
     document.getElementById("fiscal-bar").style.display = "flex";
     document.getElementById("etapa-login").style.display= "none";
     document.getElementById("etapa-token").style.display= "block";
     garantirCache(function(total){
       var st = document.getElementById("cacheStatus");
-      st.innerHTML = "<span>" + total + "</span> participantes em cache";
+      if (st) st.innerHTML = "<span>" + total + "</span> participantes em cache";
     });
-    abrirCamera(email);
+    aplicarEstacao();          // abre a câmera só se a palestra já estiver escolhida
+    populaStationsFiscal();    // carrega as palestras no seletor
+  }
+
+  // ── ESTAÇÃO OBRIGATÓRIA (palestra do fiscal) ────────────────
+  function populaStationsFiscal() {
+    var sel = document.getElementById("stationSelect");
+    var saved = localStorage.getItem("fiscal_palestra") || "";
+    fetch(SUPA_URL + "/palestras?select=id,nome&order=nome", { headers: supaHeaders() })
+      .then(function(r){ return r.json(); })
+      .then(function(data){
+        if (!Array.isArray(data)) return;
+        var opts = '<option value="">— selecione a palestra —</option>';
+        data.forEach(function(p){ opts += '<option value="'+escapeHtml(p.id)+'">'+escapeHtml(p.nome)+'</option>'; });
+        sel.innerHTML = opts;
+        if (saved && data.some(function(p){ return p.id === saved; })) sel.value = saved;
+      })
+      .catch(function(){});
+  }
+
+  function setStationFiscal() {
+    var el = document.getElementById("stationSelect");
+    var v  = el.value;
+    if (v) {
+      localStorage.setItem("fiscal_palestra", v);
+      localStorage.setItem("fiscal_palestra_nome", el.options[el.selectedIndex].text);
+    } else {
+      localStorage.removeItem("fiscal_palestra");
+      localStorage.removeItem("fiscal_palestra_nome");
+    }
+    aplicarEstacao();
+  }
+
+  // Libera a leitura só quando há palestra escolhida.
+  function aplicarEstacao() {
+    var station = localStorage.getItem("fiscal_palestra") || "";
+    var area    = document.getElementById("scannerArea");
+    var prompt  = document.getElementById("scannerPrompt");
+    if (station) {
+      prompt.style.display = "none";
+      area.style.display   = "block";
+      abrirCamera(emailAtual);
+    } else {
+      area.style.display   = "none";
+      prompt.style.display = "block";
+      if (html5QrCode) { html5QrCode.stop().catch(function(){}); html5QrCode = null; }
+    }
   }
 
   function garantirCache(callback) {
