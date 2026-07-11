@@ -24,8 +24,8 @@ function sincronizarNovosInscritos() {
   var ui  = SpreadsheetApp.getUi();
   var ss  = SpreadsheetApp.openById(CONFIG.PLANILHA_ID);
 
-  // 1. Busca tokens que já existem no Supabase
-  var existentes = supaFetch("participantes?select=token", "GET", null);
+  // 1. Busca tokens que já existem no Supabase (paginado: base > 1000)
+  var existentes = supaFetchAll("participantes?select=token");
   var tokensExistentes = {};
   if (Array.isArray(existentes)) {
     existentes.forEach(function(p) { tokensExistentes[String(p.token)] = true; });
@@ -109,10 +109,9 @@ function sincronizarAlteracoesInscritos() {
   var aba   = ss.getSheetByName(CONFIG.ABA_PARTICIPANTES);
   var dados = aba.getDataRange().getValues();
 
-  // Busca todos os participantes do Supabase de uma vez
-  var existentes = supaFetch(
-    "participantes?select=token,nome,email,cpf,palestra_id",
-    "GET", null
+  // Busca todos os participantes do Supabase de uma vez (paginado: base > 1000)
+  var existentes = supaFetchAll(
+    "participantes?select=token,nome,email,cpf,palestra_id"
   );
 
   if (!Array.isArray(existentes)) {

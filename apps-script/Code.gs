@@ -138,6 +138,36 @@ function supaFetch(path, method, body) {
 }
 
 
+// ── HELPER SUPABASE: GET PAGINADO ─────────────────────────────
+// O PostgREST limita cada resposta a 1000 linhas. Esta função pagina
+// com limit/offset e junta tudo. Use para ler tabelas inteiras (>1000).
+// Passe o path SEM limit/offset (pode ter select/order/filtros).
+function supaFetchAll(pathBase) {
+
+  var PAGINA = 1000;
+  var todos  = [];
+  var offset = 0;
+  var sep    = pathBase.indexOf("?") === -1 ? "?" : "&";
+
+  while (true) {
+    var pagina = supaFetch(
+      pathBase + sep + "limit=" + PAGINA + "&offset=" + offset,
+      "GET", null
+    );
+    if (!Array.isArray(pagina)) {
+      // Erro do PostgREST: devolve o objeto de erro (chamador trata)
+      return offset === 0 ? pagina : todos;
+    }
+    todos = todos.concat(pagina);
+    if (pagina.length < PAGINA) break;   // última página
+    offset += PAGINA;
+  }
+
+  return todos;
+
+}
+
+
 // ── SUPABASE → PLANILHA: PARTICIPANTES ────────────────────────
 // Traz todos os inscritos do Supabase para a aba PARTICIPANTES.
 // Use antes de editar/inserir na planilha (fluxo: puxar -> editar -> subir).
@@ -152,10 +182,9 @@ function sincronizarParticipantes() {
       return;
     }
 
-    var data = supaFetch(
+    var data = supaFetchAll(
       "participantes?select=token,nome,email,cpf,palestra_id,codigo_funcional,origem,unidade" +
-      "&order=nome.asc",
-      "GET", null
+      "&order=nome.asc"
     );
 
     if (!Array.isArray(data)) {
@@ -222,10 +251,9 @@ function sincronizarPresencas() {
       return;
     }
 
-    var data = supaFetch(
+    var data = supaFetchAll(
       "presencas?select=token,palestra_id,data_hora,validado_por," +
-      "participantes(nome,email),palestras(nome)&order=data_hora.asc",
-      "GET", null
+      "participantes(nome,email),palestras(nome)&order=data_hora.asc"
     );
 
     if (!Array.isArray(data)) {
