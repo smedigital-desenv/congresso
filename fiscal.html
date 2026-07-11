@@ -53,9 +53,9 @@
 </head>
 <body>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="config.js?v=18"></script>
-<script src="auth.js?v=18"></script>
-<script src="menu.js?v=18"></script>
+<script src="config.js?v=19"></script>
+<script src="auth.js?v=19"></script>
+<script src="menu.js?v=19"></script>
 <div class="container">
   <div class="logo">
     <div class="logo-icon">
@@ -209,17 +209,17 @@
     if (cacheValido()) { if (callback) callback(totalCache()); return; }
     var st = document.getElementById("cacheStatus");
     st.innerHTML = "Carregando participantes...";
-    fetchAll(SUPA_URL + "/participantes?select=token,nome,email,palestra_id,qr_url,palestras(nome)&order=token", supaHeaders())
+    fetchAll(SUPA_URL + "/participantes?select=token,nome,email,palestra_id,qr_url,palestras(nome,periodo,hora)&order=token", supaHeaders())
       .then(function(data) {
         if (Array.isArray(data)) {
-          // Normaliza palestraNome
+          // Normaliza palestraNome (com período, para distinguir manhã/tarde)
           var lista = data.map(function(p) {
             return {
               token:       p.token,
               nome:        p.nome,
               email:       p.email,
               palestraId:  p.palestra_id,
-              palestraNome: p.palestras ? p.palestras.nome : "",
+              palestraNome: p.palestras ? palestraLabel(p.palestras) : "",
               qr_url:      p.qr_url
             };
           });
