@@ -23,6 +23,7 @@
     label{display:block;font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:7px;}
     input{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:13px 16px;font-size:15px;font-family:'DM Sans',sans-serif;color:var(--text);outline:none;transition:border-color .2s,box-shadow .2s;}
     input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(79,142,247,.15);}
+    .hint{font-size:12px;color:var(--muted);margin-top:-4px;margin-bottom:6px;}
     .btn{width:100%;padding:15px;border:none;border-radius:11px;font-size:16px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;transition:opacity .15s,transform .1s;}
     .btn:active{transform:scale(.97);}
     .btn:disabled{opacity:.4;cursor:not-allowed;transform:none;}
@@ -31,18 +32,17 @@
     .msg{margin-top:12px;padding:12px 14px;border-radius:10px;font-size:13px;line-height:1.5;display:none;}
     .msg.erro{background:rgba(239,68,68,.12);color:#fca5a5;border:1px solid rgba(239,68,68,.2);display:block;}
     .msg.info{background:rgba(79,142,247,.12);color:#93c5fd;border:1px solid rgba(79,142,247,.2);display:block;}
-    #tela-confirmacao{display:none;}
+    #tela-resultado{display:none;}
+    .saudacao{font-size:15px;color:var(--text);margin-bottom:4px;}
+    .saudacao b{font-weight:600;}
+    .badge-sessao{display:inline-block;font-size:10px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;padding:2px 8px;border-radius:6px;background:rgba(79,142,247,.15);color:#93c5fd;border:1px solid rgba(79,142,247,.25);margin-bottom:10px;}
     .field-row{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:9px 0;border-bottom:1px solid var(--border);}
     .field-row:last-child{border-bottom:none;padding-bottom:0;}
     .field-row:first-child{padding-top:0;}
     .field-label{font-size:13px;color:var(--muted);flex-shrink:0;min-width:64px;}
     .field-value{font-size:14px;color:var(--text);text-align:right;word-break:break-word;font-weight:500;}
-    .qr-wrap{text-align:center;padding:8px 0 4px;}
+    .qr-wrap{text-align:center;padding:14px 0 4px;}
     .qr-wrap img{width:220px;height:220px;border-radius:12px;border:1px solid var(--border);background:#fff;padding:8px;}
-    .qr-pending{border:2px dashed var(--border);border-radius:12px;padding:28px 20px;text-align:center;}
-    .qr-pending svg{width:40px;height:40px;stroke:var(--warning);fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;margin-bottom:10px;}
-    .qr-pending p{font-size:14px;color:var(--warning);font-weight:500;margin-bottom:6px;}
-    .qr-pending small{font-size:12px;color:var(--muted);}
     .btn-download{display:inline-flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:13px;border-radius:10px;margin-top:14px;background:rgba(34,197,94,.12);color:#86efac;border:1px solid rgba(34,197,94,.25);text-decoration:none;font-size:14px;font-weight:600;transition:background .2s;}
     .btn-download:hover{background:rgba(34,197,94,.2);}
     .btn-download svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
@@ -50,9 +50,9 @@
 </head>
 <body>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="config.js?v=15"></script>
-<script src="auth.js?v=15"></script>
-<script src="menu.js?v=15"></script>
+<script src="config.js?v=16"></script>
+<script src="auth.js?v=16"></script>
+<script src="menu.js?v=16"></script>
 <div class="container">
   <div class="logo">
     <div class="logo-icon">
@@ -66,85 +66,77 @@
     <div class="card">
       <div class="card-title">Identificacao</div>
       <div class="field-group">
-        <label for="inputEmail">E-mail</label>
-        <input type="email" id="inputEmail" placeholder="seu@email.com" autocomplete="email"/>
-      </div>
-      <div class="field-group">
-        <label for="inputCPF">CPF</label>
-        <input type="text" id="inputCPF" placeholder="000.000.000-00" maxlength="14" autocomplete="off"/>
+        <label for="inputBusca">Codigo funcional ou e-mail</label>
+        <input type="text" id="inputBusca" placeholder="Ex: 40119  ou  seu@email.com" autocomplete="off"/>
       </div>
       <button class="btn btn-primary" id="btnBuscar" onclick="buscar()">Consultar inscricao</button>
       <div class="msg" id="msgForm"></div>
     </div>
   </div>
 
-  <div id="tela-confirmacao">
+  <div id="tela-resultado">
     <div class="card">
-      <div class="card-title">Sua inscricao</div>
-      <div class="field-row"><span class="field-label">Nome</span>     <span class="field-value" id="cNome"></span></div>
-      <div class="field-row"><span class="field-label">E-mail</span>   <span class="field-value" id="cEmail"></span></div>
-      <div class="field-row"><span class="field-label">Palestra</span> <span class="field-value" id="cPalestra"></span></div>
-      <div class="field-row"><span class="field-label">Token</span>    <span class="field-value" id="cToken" style="font-family:'DM Mono',monospace;font-size:13px;"></span></div>
+      <p class="saudacao">Ola, <b id="rNome"></b>!</p>
+      <p class="hint" id="rSub">Apresente o QR Code na entrada da sua palestra.</p>
     </div>
-    <div class="card">
-      <div class="card-title">QR Code de acesso</div>
-      <div id="qrDisponivel" style="display:none">
-        <div class="qr-wrap"><img id="qrImg" src="" alt="QR Code"/></div>
-        <a id="btnDownload" href="#" class="btn-download" target="_blank">
-          <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
-          Baixar QR Code
-        </a>
-      </div>
-      <div id="qrPendente" style="display:none" class="qr-pending">
-        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
-        <p>QR Code em preparacao</p>
-        <small>Seu QR Code estara disponivel em ate 1 hora.<br>Volte aqui para baixa-lo.</small>
-      </div>
-    </div>
-    <button class="btn btn-ghost" onclick="voltar()">Consultar outro e-mail</button>
+    <div id="listaSessoes"></div>
+    <button class="btn btn-ghost" onclick="voltar()">Consultar outro</button>
   </div>
 </div>
 
 <script>
-  // SUPA_URL / SUPA_KEY definidos em config.js
+  // SUPA_URL / SUPA_KEY / SUPA_SCHEMA definidos em config.js
+  var BASE_VALIDACAO = "https://smedigital.com.br/presenca/validar.html";
 
   function supaHeaders() {
-    return { "apikey": SUPA_KEY, "Authorization": "Bearer " + SUPA_KEY, "Accept-Profile": SUPA_SCHEMA, "Content-Profile": SUPA_SCHEMA };
+    return { "apikey": SUPA_KEY, "Authorization": "Bearer " + SUPA_KEY, "Content-Type": "application/json", "Accept-Profile": SUPA_SCHEMA, "Content-Profile": SUPA_SCHEMA };
   }
 
-  document.getElementById("inputCPF").addEventListener("input", function() {
-    var v = this.value.replace(/\D/g,"").substring(0,11);
-    if (v.length>9)      v=v.replace(/(\d{3})(\d{3})(\d{3})(\d{0,2})/,"$1.$2.$3-$4");
-    else if (v.length>6) v=v.replace(/(\d{3})(\d{3})(\d{0,3})/,"$1.$2.$3");
-    else if (v.length>3) v=v.replace(/(\d{3})(\d{0,3})/,"$1.$2");
-    this.value=v;
-  });
+  // URL da imagem do QR gerada direto do token (sem depender do Drive)
+  function qrImgUrl(token) {
+    var alvo = BASE_VALIDACAO + "?t=" + encodeURIComponent(token);
+    return "https://quickchart.io/qr?size=300&margin=1&ecLevel=M&text=" + encodeURIComponent(alvo);
+  }
 
   function buscar() {
-    var email = document.getElementById("inputEmail").value.trim().toLowerCase();
-    var cpf   = document.getElementById("inputCPF").value.replace(/\D/g,"");
+    var valor = document.getElementById("inputBusca").value.trim();
     var msg   = document.getElementById("msgForm");
     var btn   = document.getElementById("btnBuscar");
-
-    if (!email) { msg.className="msg erro"; msg.innerHTML="Informe seu e-mail."; return; }
-    if (cpf.length!==11) { msg.className="msg erro"; msg.innerHTML="Informe um CPF valido."; return; }
+    if (!valor) { msg.className="msg erro"; msg.innerHTML="Informe seu codigo funcional ou e-mail."; return; }
 
     btn.disabled=true; btn.textContent="Consultando...";
     msg.className="msg info"; msg.innerHTML="Buscando sua inscricao...";
 
-    // Chama a função RPC consultar_inscricao (SECURITY DEFINER) — devolve só a
-    // linha cujo e-mail E CPF batem, sem expor a tabela participantes. Veja SECURITY.md.
-    // Se a função ainda não existir no Supabase, faz fallback para a consulta antiga.
-    fetch(SUPA_URL + "/rpc/consultar_inscricao", {
+    // Funcao RPC (SECURITY DEFINER): busca por codigo funcional OU e-mail.
+    fetch(SUPA_URL + "/rpc/consultar_inscricao_busca", {
       method:  "POST",
-      headers: { "apikey": SUPA_KEY, "Authorization": "Bearer " + SUPA_KEY, "Content-Type": "application/json", "Accept-Profile": SUPA_SCHEMA, "Content-Profile": SUPA_SCHEMA },
-      body:    JSON.stringify({ p_email: email, p_cpf: cpf })
+      headers: supaHeaders(),
+      body:    JSON.stringify({ p_busca: valor })
     })
+    .then(function(r){ if (!r.ok) throw new Error("rpc"); return r.json(); })
+    .then(function(data){ finalizar(data, btn, msg); })
+    .catch(function(){
+      // Fallback: consulta direta (caso a RPC ainda nao exista no Supabase)
+      buscarLegado(valor, btn, msg);
+    });
+  }
+
+  // Fallback compativel: consulta direta por email (case-insensitive) ou codigo_funcional.
+  function buscarLegado(valor, btn, msg) {
+    var v = encodeURIComponent(valor);
+    var url = SUPA_URL + "/participantes?or=(email.ilike." + v + ",codigo_funcional.eq." + v + ")" +
+              "&select=token,nome,email,palestra_id,palestras(nome,local,endereco,periodo,hora)";
+    fetch(url, { headers: supaHeaders() })
     .then(function(r){ return r.json(); })
-    .then(function(data) {
-      if (Array.isArray(data)) { finalizarBusca(data, btn, msg); return; }
-      // RPC indisponível (ex.: função ainda não criada) — usa consulta legada
-      return buscarLegado(email, cpf, btn, msg);
+    .then(function(data){
+      if (Array.isArray(data)) {
+        data = data.map(function(p){
+          var pl = p.palestras || {};
+          return { token:p.token, nome:p.nome, email:p.email, palestra_id:p.palestra_id,
+                   palestra_nome:pl.nome, local:pl.local, endereco:pl.endereco, periodo:pl.periodo, hora:pl.hora };
+        });
+      }
+      finalizar(Array.isArray(data)?data:[], btn, msg);
     })
     .catch(function(){
       btn.disabled=false; btn.textContent="Consultar inscricao";
@@ -152,71 +144,73 @@
     });
   }
 
-  function finalizarBusca(data, btn, msg) {
+  function finalizar(data, btn, msg) {
     btn.disabled=false; btn.textContent="Consultar inscricao";
-    if (!data || data.length===0) {
-      msg.className="msg erro"; msg.innerHTML="Inscricao nao encontrada. Verifique o e-mail e CPF informados.";
+    if (!Array.isArray(data) || data.length===0) {
+      msg.className="msg erro"; msg.innerHTML="Inscricao nao encontrada. Verifique o codigo funcional ou e-mail informado.";
       return;
     }
     msg.className="msg";
-    mostrarConfirmacao(data[0]);
+    mostrarResultado(data);
   }
 
-  // Fallback compatível com o esquema antigo (enquanto a RPC não existe).
-  function buscarLegado(email, cpf, btn, msg) {
-    return fetch(
-      SUPA_URL + "/participantes?email=eq." + encodeURIComponent(email) +
-      "&cpf=eq." + encodeURIComponent(cpf) +
-      "&select=token,nome,email,qr_url,palestras(nome)&limit=1",
-      { headers: supaHeaders() }
-    )
-    .then(function(r){ return r.json(); })
-    .then(function(data) {
-      if (Array.isArray(data)) {
-        data = data.map(function(p){ p.palestra_nome = p.palestras ? p.palestras.nome : ""; return p; });
-      }
-      finalizarBusca(Array.isArray(data) ? data : [], btn, msg);
+  function mostrarResultado(rows) {
+    document.getElementById("rNome").textContent = rows[0].nome || "";
+    document.getElementById("rSub").textContent =
+      rows.length > 1
+        ? "Voce tem " + rows.length + " inscricoes. Cada palestra tem o seu proprio QR Code."
+        : "Apresente o QR Code na entrada da sua palestra.";
+
+    var lista = document.getElementById("listaSessoes");
+    lista.innerHTML = "";
+    rows.forEach(function(p) {
+      var per   = nomePeriodo(p.periodo, p.palestra_id);
+      var hora  = p.hora || horaDoId(p.palestra_id);
+      var local = escapeHtml(p.local || "-") + (p.endereco ? '<br><span style="color:var(--muted);font-size:12px">'+escapeHtml(p.endereco)+'</span>' : '');
+      var img   = qrImgUrl(p.token);
+
+      var card = document.createElement("div");
+      card.className = "card";
+      card.innerHTML =
+        '<span class="badge-sessao">' + escapeHtml(per) + '</span>' +
+        '<div class="field-row"><span class="field-label">Palestra</span><span class="field-value">' + escapeHtml(p.palestra_nome || p.palestra_id) + '</span></div>' +
+        '<div class="field-row"><span class="field-label">Data</span><span class="field-value">21/07/2026</span></div>' +
+        '<div class="field-row"><span class="field-label">Horario</span><span class="field-value">' + escapeHtml(hora) + '</span></div>' +
+        '<div class="field-row"><span class="field-label">Local</span><span class="field-value">' + local + '</span></div>' +
+        '<div class="field-row"><span class="field-label">Token</span><span class="field-value" style="font-family:\'DM Mono\',monospace;font-size:13px">' + escapeHtml(p.token) + '</span></div>' +
+        '<div class="qr-wrap"><img src="' + img + '" alt="QR Code"></div>' +
+        '<a class="btn-download" href="' + img + '" target="_blank" rel="noopener">' +
+          '<svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>' +
+          'Abrir / baixar QR Code</a>';
+      lista.appendChild(card);
     });
+
+    document.getElementById("tela-form").style.display     = "none";
+    document.getElementById("tela-resultado").style.display = "block";
   }
 
-  function mostrarConfirmacao(p) {
-    document.getElementById("cNome").textContent     = p.nome;
-    document.getElementById("cEmail").textContent    = p.email;
-    document.getElementById("cPalestra").textContent = p.palestra_nome || "-";
-    document.getElementById("cToken").textContent    = p.token;
-
-    if (p.qr_url) {
-      // Extrai fileId da URL do verQR
-      var fidMatch = p.qr_url.match(/fid=([^&]+)/);
-      if (fidMatch) {
-        var fileId = decodeURIComponent(fidMatch[1]);
-        document.getElementById("qrImg").src        = "https://lh3.googleusercontent.com/d/" + fileId;
-        document.getElementById("btnDownload").href = "https://drive.google.com/uc?export=download&id=" + fileId;
-        document.getElementById("qrDisponivel").style.display = "block";
-        document.getElementById("qrPendente").style.display   = "none";
-      } else {
-        document.getElementById("qrDisponivel").style.display = "none";
-        document.getElementById("qrPendente").style.display   = "block";
-      }
-    } else {
-      document.getElementById("qrDisponivel").style.display = "none";
-      document.getElementById("qrPendente").style.display   = "block";
-    }
-
-    document.getElementById("tela-form").style.display        = "none";
-    document.getElementById("tela-confirmacao").style.display = "block";
+  function nomePeriodo(periodo, id) {
+    if (periodo) return periodo;
+    if (/_M\d*$/.test(id||"")) return "Manha";
+    if (/_T\d*$/.test(id||"")) return "Tarde";
+    if (/_N\d*$/.test(id||"")) return "Noite";
+    return "Sessao";
+  }
+  function horaDoId(id) {
+    if (/_M\d*$/.test(id||"")) return "08:00";
+    if (/_T\d*$/.test(id||"")) return "14:00";
+    if (/_N\d*$/.test(id||"")) return "19:00";
+    return "";
   }
 
   function voltar() {
-    document.getElementById("tela-confirmacao").style.display = "none";
-    document.getElementById("tela-form").style.display        = "block";
-    document.getElementById("inputEmail").value = "";
-    document.getElementById("inputCPF").value   = "";
+    document.getElementById("tela-resultado").style.display = "none";
+    document.getElementById("tela-form").style.display      = "block";
+    document.getElementById("inputBusca").value = "";
     document.getElementById("msgForm").className = "msg";
   }
 
-  document.getElementById("inputEmail").addEventListener("keydown", function(e){ if(e.key==="Enter") document.getElementById("inputCPF").focus(); });
-  document.getElementById("inputCPF").addEventListener("keydown",   function(e){ if(e.key==="Enter") buscar(); });
+  document.getElementById("inputBusca").addEventListener("keydown", function(e){ if(e.key==="Enter") buscar(); });
 </script>
 </body>
 </html>
