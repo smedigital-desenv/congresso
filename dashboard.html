@@ -43,6 +43,14 @@
     /* SECAO */
     .secao-titulo{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px;}
 
+    /* BUSCA GLOBAL */
+    .busca-global{position:relative;margin-bottom:16px;}
+    .busca-global .busca-input{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:13px 40px 13px 42px;font-size:15px;font-family:'DM Sans',sans-serif;color:var(--text);outline:none;transition:border-color .2s,box-shadow .2s;}
+    .busca-global .busca-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(79,142,247,.13);}
+    .busca-icon{position:absolute;left:15px;top:50%;transform:translateY(-50%);width:17px;height:17px;fill:none;stroke:var(--muted);stroke-width:2;stroke-linecap:round;stroke-linejoin:round;pointer-events:none;}
+    .busca-limpar{position:absolute;right:8px;top:50%;transform:translateY(-50%);background:var(--surface2);border:none;color:var(--muted);width:28px;height:28px;border-radius:8px;font-size:19px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+    .busca-limpar:hover{color:var(--text);}
+
     /* CARDS PALESTRA */
     .palestras-grid{display:flex;flex-direction:column;gap:8px;}
     .palestra-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px 18px;cursor:pointer;transition:border-color .2s,background .2s;}
@@ -225,6 +233,15 @@
       <div class="resumo-card"><div class="label">Ausentes</div> <div class="valor cor-ausente"  id="rAusentes">-</div></div>
       <div class="resumo-card"><div class="label">Taxa geral</div><div class="valor cor-taxa"    id="rTaxa">-</div></div>
     </div>
+    <!-- Busca global de professor (todas as palestras) -->
+    <div class="busca-global">
+      <svg viewBox="0 0 24 24" class="busca-icon"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+      <input class="busca-input" id="buscaGlobal" type="text" placeholder="Buscar professor por nome, e-mail ou codigo..." oninput="renderizarBuscaGlobal()" autocomplete="off">
+      <button class="busca-limpar" id="buscaLimpar" onclick="limparBuscaGlobal()" style="display:none">&times;</button>
+    </div>
+    <div id="resultadoBusca" style="display:none;margin-bottom:20px;"></div>
+
+    <div id="secaoPalestras">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
       <span class="secao-titulo" style="margin-bottom:0">Por palestra</span>
       <div style="display:flex;gap:8px;">
@@ -249,6 +266,7 @@
     <div class="palestras-grid" id="palestrasGrid">
       <div class="estado"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>Carregando...</div>
     </div>
+    </div><!-- /secaoPalestras -->
     <div class="atualizado" id="atualizado"></div>
   </div>
 
@@ -418,6 +436,7 @@
       if (!ok) return;
       if (telaAtual === "gerencial") renderizarGerencial();
       else renderizarDashboard();
+      if (buscaGlobalAtiva()) renderizarBuscaGlobal();
       if (palestraAtual) renderizarLista();
     });
   }
@@ -469,6 +488,70 @@
     });
     html += '</div>';
     document.getElementById("palestrasGrid").innerHTML = html;
+  }
+
+  // ── BUSCA GLOBAL (todas as palestras) ───────────────────────
+  function limparBuscaGlobal() {
+    document.getElementById("buscaGlobal").value = "";
+    renderizarBuscaGlobal();
+    document.getElementById("buscaGlobal").focus();
+  }
+
+  function renderizarBuscaGlobal() {
+    var inp = document.getElementById("buscaGlobal");
+    var q   = inp.value.trim().toLowerCase();
+    var sec = document.getElementById("secaoPalestras");
+    var box = document.getElementById("resultadoBusca");
+    document.getElementById("buscaLimpar").style.display = q ? "flex" : "none";
+
+    if (!q) { box.style.display = "none"; box.innerHTML = ""; sec.style.display = "block"; return; }
+    sec.style.display = "none"; box.style.display = "block";
+
+    var tP = {};  dadosPresencas.forEach(function(p){ tP[p.token] = p; });
+    var mapPal = {}; dadosPalestras.forEach(function(p){ mapPal[p.id] = p; });
+
+    var res = dadosParticipantes.filter(function(p){
+      return (p.nome||"").toLowerCase().indexOf(q)  !== -1 ||
+             (p.email||"").toLowerCase().indexOf(q) !== -1 ||
+             (p.token||"").toLowerCase().indexOf(q) !== -1;
+    }).sort(function(a,b){
+      var aP = tP[a.token]?1:0, bP = tP[b.token]?1:0;
+      if (aP !== bP) return aP - bP;                 // ausentes primeiro (a validar)
+      return (a.nome||"").localeCompare(b.nome||"");
+    });
+
+    var LIMITE = 60, total = res.length;
+    res = res.slice(0, LIMITE);
+
+    if (res.length === 0) {
+      box.innerHTML = '<div class="estado"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>Nenhum professor encontrado.</div>';
+      return;
+    }
+
+    var html = '<div class="secao-titulo">' + total + ' resultado(s)' + (total > LIMITE ? ' — refine a busca (mostrando ' + LIMITE + ')' : '') + '</div>';
+    res.forEach(function(p){
+      var pr  = tP[p.token];
+      var pal = mapPal[p.palestra_id] ? mapPal[p.palestra_id].nome : p.palestra_id;
+      var dt  = pr && pr.data_hora ? new Date(pr.data_hora).toLocaleString("pt-BR") : "";
+      html +=
+        '<div class="participante-row '+(pr?"presente":"ausente")+'" id="row-'+p.token+'">'+
+          '<div class="participante-info">'+
+            '<div class="participante-nome">'+escapeHtml(p.nome||"")+'</div>'+
+            '<div class="participante-email">'+escapeHtml(pal)+(p.email?' · '+escapeHtml(p.email):'')+'</div>'+
+            (pr?'<div class="participante-meta">Presente · '+dt+'</div>':'')+
+          '</div>'+
+          (pr
+            ? '<span class="tag-presente">Presente</span>'
+            : '<button class="btn-validar-inline" id="btn-'+p.token+'" onclick="validarInline(\''+p.token+'\',\''+p.palestra_id+'\')">Validar</button>'
+          )+
+        '</div>';
+    });
+    box.innerHTML = html;
+  }
+
+  function buscaGlobalAtiva() {
+    var i = document.getElementById("buscaGlobal");
+    return i && i.value.trim() !== "";
   }
 
   // ── MODAL ───────────────────────────────────────────────────
@@ -572,11 +655,18 @@
     })
     .then(function() {
       dadosPresencas.push({ token: token, palestra_id: palestraId, data_hora: new Date().toISOString(), validado_por: emailFiscal });
-      renderizarLista();
+      if (palestraAtual) renderizarLista();
+      if (buscaGlobalAtiva()) renderizarBuscaGlobal();
       renderizarDashboard();
     })
     .catch(function(err) {
-      if (err.message === "ja_registrado") { renderizarLista(); }
+      if (err.message === "ja_registrado") {
+        if (!dadosPresencas.some(function(x){ return x.token === token; }))
+          dadosPresencas.push({ token: token, palestra_id: palestraId, data_hora: new Date().toISOString(), validado_por: "" });
+        if (palestraAtual) renderizarLista();
+        if (buscaGlobalAtiva()) renderizarBuscaGlobal();
+        renderizarDashboard();
+      }
       else { btn.disabled=false; btn.textContent="Validar"; alert("Erro: "+err.message); }
     });
   }
