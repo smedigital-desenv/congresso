@@ -128,8 +128,9 @@
       .then(function(r){ return r.json(); })
       .then(function(data) {
         if (!data || data.length === 0) {
-          mostrarResultado({ sucesso:false, mensagem:"Token invalido ou participante nao encontrado." });
-          document.getElementById("btnNovo").style.display="flex";
+          // Token exato nao encontrado. Pode ser digitacao manual do codigo "puro"
+          // de quem tem 2 sessoes (token real termina em _M/_T/_N). Avisa e oferece as opcoes.
+          verificarMultiSessao(tokenGlobal);
           return;
         }
         var p = data[0];
@@ -145,6 +146,61 @@
         mostrarResultado({ sucesso:false, mensagem:"Erro ao buscar participante." });
         document.getElementById("btnNovo").style.display="flex";
       });
+  }
+
+  // Digitacao manual do codigo "puro" de quem tem 2 sessoes: o token real
+  // termina em _M/_T/_N. Busca os candidatos e mostra o aviso + opcoes.
+  function verificarMultiSessao(base) {
+    var cands = [base + "_M", base + "_T", base + "_N"];
+    var url = SUPA_URL + "/participantes?token=in.(" + cands.join(",") +
+              ")&select=token,nome,palestra_id,palestras(nome)";
+    fetch(url, { headers: supaHeaders() })
+      .then(function(r){ return r.json(); })
+      .then(function(list) {
+        if (Array.isArray(list) && list.length > 0) {
+          mostrarAvisoPeriodo(base, list);
+        } else {
+          mostrarResultado({ sucesso:false, mensagem:"Token invalido ou participante nao encontrado." });
+          document.getElementById("btnNovo").style.display = "flex";
+        }
+      })
+      .catch(function(){
+        mostrarResultado({ sucesso:false, mensagem:"Erro ao buscar participante." });
+        document.getElementById("btnNovo").style.display = "flex";
+      });
+  }
+
+  function labelPeriodo(tok) {
+    if (/_M\d*$/.test(tok)) return "Manhã";
+    if (/_T\d*$/.test(tok)) return "Tarde";
+    if (/_N\d*$/.test(tok)) return "Noite";
+    return "";
+  }
+
+  function mostrarAvisoPeriodo(base, list) {
+    if (list[0] && list[0].nome) document.getElementById("fNome").textContent = list[0].nome;
+    var res = document.getElementById("resultado");
+    res.className = "resultado erro";
+    res.innerHTML =
+      "&#9888; Este participante tem <b>mais de uma inscrição</b>." +
+      "<br><small>Na digitação manual, informe o período no final do token — ex.: <b>" +
+      escapeHtml(base) + "_M</b> (manhã) ou <b>" + escapeHtml(base) + "_T</b> (tarde)." +
+      "<br>Ou toque na sessão que está validando:</small>";
+    var box = document.createElement("div");
+    box.style.cssText = "margin-top:12px;display:flex;flex-direction:column;gap:8px;";
+    list.forEach(function(p) {
+      var per  = labelPeriodo(p.token);
+      var nome = p.palestras ? p.palestras.nome : p.palestra_id;
+      var a = document.createElement("a");
+      a.href = "validar.html?t=" + encodeURIComponent(p.token);
+      a.className = "btn btn-primary";
+      a.style.cssText = "text-decoration:none;display:block;text-align:center;padding:14px;";
+      a.innerHTML = "<b>" + escapeHtml(per) + "</b> — " + escapeHtml(nome);
+      box.appendChild(a);
+    });
+    res.parentNode.insertBefore(box, res.nextSibling);
+    document.getElementById("btnValidar").style.display = "none";
+    document.getElementById("btnNovo").style.display = "flex";
   }
 
   function preencherParticipante(d, doCache) {
