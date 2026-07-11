@@ -17,7 +17,7 @@
  *   2. Colunas local/endereco/periodo/hora em palestras (db/adicionar-local-sessoes.sql).
  *   3. SUPABASE_SERVICE_KEY em Script Properties (a mesma do Code.gs).
  *
- * Rode uma vez enviarQRParaToken("40119") para testar antes de ligar o gatilho.
+ * Rode uma vez enviarQRParaToken("<token de um inscrito>") para testar antes de ligar o gatilho.
  */
 
 var QR_ASSUNTO   = "Confirmação de inscrição no Congresso";
