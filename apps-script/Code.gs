@@ -508,8 +508,10 @@ function onOpen() {
     .addItem("Configurar envio automatico (1x/hora)",  "configurarGatilhoEmail")
 
     .addSeparator()
-    .addItem("Enviar QR Codes pendentes",              "enviarQRCodesPendentes")
-    .addItem("Configurar envio de QR (1x/hora)",       "configurarGatilhoQR")
+    .addItem("Enviar comprovantes pendentes (lote)",   "enviarQRCodesPendentes")
+    .addItem("Configurar envio automatico (1x/hora)",  "configurarGatilhoQR")
+    .addItem("TESTE — enviar aos meus e-mails",        "testarMeuEmail")
+    .addItem("Zerar contador do dia",                  "resetContadorDiario")
 
     .addToUi();
 
