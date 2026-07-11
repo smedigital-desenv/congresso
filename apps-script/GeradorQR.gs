@@ -17,7 +17,7 @@ const CONFIG = {
   PASTA_RAIZ_ID:     "1l3cmHgWyi_13YXhcXenYJg4lUDP7JMsL",
 
   // Confirme escaneando 1 QR qual URL realmente abre o site publicado.
-  URL_VALIDACAO:     "https://smedigital.com.br/presenca/validar.html",
+  URL_VALIDACAO:     "https://smedigital.com.br/congresso/validar.html",
 
   // Supabase (mesmo projeto do gom; schema da presença)
   SUPABASE_URL:      "https://iqldovwttomkjkoakosc.supabase.co",
