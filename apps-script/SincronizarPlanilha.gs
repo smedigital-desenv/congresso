@@ -68,17 +68,23 @@ function sincronizarNovosInscritos() {
     var email      = String(dados[i][2]).trim();
     var cpf        = String(dados[i][3]).replace(/\D/g, "");
     var palestraId = String(dados[i][4]).trim();
+    var codigo     = String(dados[i][5] || "").trim();   // F  CODIGO_FUNCIONAL
+    var origem     = String(dados[i][6] || "").trim();   // G  ORIGEM
+    var unidade    = String(dados[i][7] || "").trim();   // H  UNIDADE
 
     if (!token)                  { ignorados++; continue; }
     if (tokensExistentes[token]) { ignorados++; continue; }
 
     try {
       supaFetch("participantes?on_conflict=token", "POST", {
-        token:       token,
-        nome:        nome,
-        email:       email,
-        cpf:         cpf,
-        palestra_id: palestraId
+        token:            token,
+        nome:             nome,
+        email:            email,
+        cpf:              cpf,
+        palestra_id:      palestraId,
+        codigo_funcional: codigo  || null,
+        origem:           origem  || null,
+        unidade:          unidade || null
       });
       inseridos++;
     } catch(e) {
@@ -111,7 +117,7 @@ function sincronizarAlteracoesInscritos() {
 
   // Busca todos os participantes do Supabase de uma vez (paginado: base > 1000)
   var existentes = supaFetchAll(
-    "participantes?select=token,nome,email,cpf,palestra_id"
+    "participantes?select=token,nome,email,cpf,palestra_id,codigo_funcional,origem,unidade"
   );
 
   if (!Array.isArray(existentes)) {
@@ -134,6 +140,9 @@ function sincronizarAlteracoesInscritos() {
     var email      = String(dados[i][2]).trim().toLowerCase();
     var cpf        = String(dados[i][3]).replace(/\D/g, "");
     var palestraId = String(dados[i][4]).trim();
+    var codigo     = String(dados[i][5] || "").trim();   // F  CODIGO_FUNCIONAL
+    var origem     = String(dados[i][6] || "").trim();   // G  ORIGEM
+    var unidade    = String(dados[i][7] || "").trim();   // H  UNIDADE
 
     if (!token) { ignorados++; continue; }
 
@@ -147,7 +156,10 @@ function sincronizarAlteracoesInscritos() {
       atual.nome        !== nome       ||
       atual.email       !== email      ||
       atual.cpf         !== cpf        ||
-      String(atual.palestra_id) !== palestraId;
+      String(atual.palestra_id)      !== palestraId ||
+      String(atual.codigo_funcional || "") !== codigo ||
+      String(atual.origem  || "")    !== origem      ||
+      String(atual.unidade || "")    !== unidade;
 
     if (!mudou) { ignorados++; continue; }
 
@@ -155,7 +167,12 @@ function sincronizarAlteracoesInscritos() {
     var res = supaFetch(
       "participantes?token=eq." + encodeURIComponent(token),
       "PATCH",
-      { nome: nome, email: email, cpf: cpf, palestra_id: palestraId }
+      {
+        nome: nome, email: email, cpf: cpf, palestra_id: palestraId,
+        codigo_funcional: codigo  || null,
+        origem:           origem  || null,
+        unidade:          unidade || null
+      }
     );
 
     if (res && res.error) {
