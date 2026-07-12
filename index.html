@@ -129,6 +129,17 @@
     .btn-baixar-ing{width:100%;padding:12px;border-radius:11px;border:1px solid var(--line);background:var(--surface);color:var(--navy);font:600 14px 'DM Sans';cursor:pointer;margin:-4px 0 16px;display:flex;align-items:center;justify-content:center;gap:8px;}
     .btn-baixar-ing svg,.btn-print svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
     .btn-print{width:100%;padding:14px;border-radius:12px;border:1px solid var(--navy);background:var(--navy);color:#fff;font:600 15px 'DM Sans';cursor:pointer;margin-bottom:10px;display:flex;align-items:center;justify-content:center;gap:8px;}
+    /* ---- ESTADO DA SESSÃO (andamento / participação) ---- */
+    .ing-status{padding:15px 22px;display:flex;gap:11px;align-items:flex-start;line-height:1.5;font-size:13.5px;}
+    .ing-status svg{width:20px;height:20px;flex-shrink:0;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;margin-top:1px;}
+    .ing-status strong{display:block;font-size:15px;margin-bottom:2px;}
+    .ing-status.andamento{background:#fdf6e3;color:#8a5a00;border-top:1px solid #f0e2b8;}
+    .ing-status.andamento svg{stroke:#c2892f;}
+    .ing-status.participacao{background:#e9f7ee;color:#1b6e3a;border-top:1px solid #bfe6cd;}
+    .ing-status.participacao svg{stroke:#2f8f5b;}
+    .ing-selo{display:inline-flex;align-items:center;gap:6px;background:#e9f7ee;color:#1b6e3a;border:1px solid #bfe6cd;border-radius:999px;padding:3px 11px;font-size:11px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;margin:0 22px 14px;}
+    .pulso{width:9px;height:9px;border-radius:50%;background:#c2892f;box-shadow:0 0 0 0 rgba(194,137,47,.5);animation:pulso 1.6s infinite;}
+    @keyframes pulso{0%{box-shadow:0 0 0 0 rgba(194,137,47,.5);}70%{box-shadow:0 0 0 8px rgba(194,137,47,0);}100%{box-shadow:0 0 0 0 rgba(194,137,47,0);}}
 
     /* ---- FOOTER ---- */
     footer{background:var(--navy);color:#cdd6e2;padding:34px 0;text-align:center;font-size:13.5px;}
@@ -223,7 +234,7 @@
         <p class="hint" id="rSub">Guarde ou imprima seu comprovante de inscrição e apresente o QR Code na entrada.</p>
       </div>
       <div id="listaSessoes"></div>
-      <button class="btn-print" onclick="window.print()"><svg viewBox="0 0 24 24"><path d="M6 9V2h12v7M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2M6 14h12v8H6z"/></svg>Imprimir comprovante de inscrição</button>
+      <button class="btn-print" onclick="window.print()"><svg viewBox="0 0 24 24"><path d="M6 9V2h12v7M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2M6 14h12v8H6z"/></svg>Imprimir comprovante</button>
       <button class="btn btn-ghost" onclick="voltar()">Consultar outro</button>
     </div>
   </div>
@@ -313,48 +324,107 @@
   function finalizar(data, btn, msg) {
     btn.disabled=false; btn.textContent="Consultar inscrição";
     if (!Array.isArray(data) || data.length===0) { msg.className="msg erro"; msg.innerHTML="Inscrição não encontrada. Verifique o código funcional ou e-mail informado."; return; }
-    msg.className="msg"; mostrarResultado(data);
+    msg.className="msg";
+    var tokens = data.map(function(p){ return p.token; }).filter(Boolean);
+    carregarPresencas(tokens).then(function(mapPres){
+      data.forEach(function(p){ var pr=mapPres[p.token]; p.presente=!!pr; p.data_presenca=pr?pr.data_hora:null; });
+      mostrarResultado(data);
+    });
+  }
+
+  // Presenças já registradas para os tokens consultados (a chave anon lê presencas).
+  function carregarPresencas(tokens){
+    if (!tokens.length) return Promise.resolve({});
+    var inList = tokens.map(function(t){ return '"'+String(t).replace(/"/g,"")+'"'; }).join(",");
+    var url = SUPA_URL + "/presencas?select=token,data_hora&token=in.(" + encodeURIComponent(inList) + ")";
+    return fetch(url, { headers: supaHeaders() })
+      .then(function(r){ return r.ok ? r.json() : []; })
+      .then(function(arr){ var m={}; if(Array.isArray(arr)) arr.forEach(function(x){ m[x.token]=x; }); return m; })
+      .catch(function(){ return {}; });
   }
 
   function mostrarResultado(rows) {
     document.getElementById("rNome").textContent = rows[0].nome || "";
-    document.getElementById("rSub").textContent = rows.length > 1
-      ? "Você tem " + rows.length + " inscrições. Guarde/imprima o comprovante de cada palestra."
-      : "Guarde ou imprima seu comprovante de inscrição e apresente o QR Code na entrada.";
+    var estados = rows.map(estadoSessao);
+    var soParticipacao = estados.every(function(e){ return e==="participacao"; });
+    var algumPresente  = estados.some(function(e){ return e!=="inscricao"; });
+    document.getElementById("rSub").textContent =
+      soParticipacao ? "Presença confirmada. Baixe ou imprima seu comprovante de participação."
+      : algumPresente ? "Acompanhe abaixo a situação de cada palestra."
+      : (rows.length > 1
+          ? "Você tem " + rows.length + " inscrições. Guarde/imprima o comprovante de cada palestra."
+          : "Guarde ou imprima seu comprovante de inscrição e apresente o QR Code na entrada.");
+
     var lista = document.getElementById("listaSessoes"); lista.innerHTML = "";
     rows.forEach(function(p) {
+      var estado = estadoSessao(p);
       var per=nomePeriodo(p.periodo,p.palestra_id), hora=p.hora||horaDoId(p.palestra_id), pal=palestranteDe(p.palestra_id);
-      var alvo = BASE_VALIDACAO + "?t=" + encodeURIComponent(p.token);
       var t = document.createElement("div"); t.className="ingresso";
-      t.innerHTML =
+
+      var subLabel = estado==="participacao" ? "Comprovante de participa&ccedil;&atilde;o"
+                   : estado==="andamento"    ? "Presen&ccedil;a em valida&ccedil;&atilde;o"
+                   : "Credencial de acesso";
+
+      var cabecalho =
         '<div class="ing-head"><div class="ing-evento">Congresso da Rede Municipal de Ensino &middot; 21/07/2026</div><div class="ing-tema">Educar para COMviver &mdash; Ribeir&atilde;o 170 anos</div></div>'+
-        '<div class="ing-nome">'+escapeHtml(p.nome||"")+'</div><div class="ing-sub">Credencial de acesso</div>'+
+        '<div class="ing-nome">'+escapeHtml(p.nome||"")+'</div><div class="ing-sub">'+subLabel+'</div>'+
+        (estado==="participacao"
+          ? '<div class="ing-selo"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="#1b6e3a" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>Presen&ccedil;a confirmada</div>'
+          : "");
+
+      var corpo =
         '<div class="ing-body"><div class="ing-palestra">'+escapeHtml(p.palestra_nome||p.palestra_id)+'</div>'+
           (pal?'<div class="ing-palestrante">com '+escapeHtml(pal)+'</div>':'')+
           '<div class="ing-grid"><div class="ing-info"><div class="k">Data</div><div class="v">21/07</div></div>'+
           '<div class="ing-info"><div class="k">Hor&aacute;rio</div><div class="v">'+escapeHtml(hora)+'</div></div>'+
           '<div class="ing-info"><div class="k">Per&iacute;odo</div><div class="v">'+escapeHtml(per)+'</div></div></div>'+
-          '<div class="ing-local"><strong>'+escapeHtml(p.local||"-")+'</strong>'+(p.endereco?'<br><span class="end">'+escapeHtml(p.endereco)+'</span>':'')+'</div></div>'+
-        '<div class="ing-divider"></div>'+
-        '<div class="ing-qr"><img class="ing-qrimg" alt="QR Code"><div class="ing-token">'+escapeHtml(p.token)+'</div><div class="ing-foot">Apresente este QR Code na entrada</div></div>';
-      var btn=document.createElement("button"); btn.className="btn-baixar-ing";
-      btn.innerHTML='<svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Baixar comprovante de inscrição';
-      btn.onclick=function(){ baixarIngresso(t, p.token); };
-      lista.appendChild(t); lista.appendChild(btn);
-      var imgEl=t.querySelector(".ing-qrimg");
-      if (window.QRCode && QRCode.toDataURL) QRCode.toDataURL(alvo,{width:300,margin:1,errorCorrectionLevel:"M"},function(e,u){ imgEl.src=e?qrImgUrl(p.token):u; });
-      else imgEl.src=qrImgUrl(p.token);
+          '<div class="ing-local"><strong>'+escapeHtml(p.local||"-")+'</strong>'+(p.endereco?'<br><span class="end">'+escapeHtml(p.endereco)+'</span>':'')+'</div></div>';
+
+      if (estado === "inscricao") {
+        var alvo = BASE_VALIDACAO + "?t=" + encodeURIComponent(p.token);
+        t.innerHTML = cabecalho + corpo +
+          '<div class="ing-divider"></div>'+
+          '<div class="ing-qr"><img class="ing-qrimg" alt="QR Code"><div class="ing-token">'+escapeHtml(p.token)+'</div><div class="ing-foot">Apresente este QR Code na entrada</div></div>';
+        var b1=document.createElement("button"); b1.className="btn-baixar-ing";
+        b1.innerHTML='<svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Baixar comprovante de inscrição';
+        b1.onclick=function(){ baixarIngresso(t, p.token, "comprovante_"); };
+        lista.appendChild(t); lista.appendChild(b1);
+        var imgEl=t.querySelector(".ing-qrimg");
+        if (window.QRCode && QRCode.toDataURL) QRCode.toDataURL(alvo,{width:300,margin:1,errorCorrectionLevel:"M"},function(e,u){ imgEl.src=e?qrImgUrl(p.token):u; });
+        else imgEl.src=qrImgUrl(p.token);
+
+      } else if (estado === "andamento") {
+        t.innerHTML = cabecalho + corpo +
+          '<div class="ing-status andamento"><span class="pulso"></span><div>'+
+            '<strong>Palestra em andamento</strong>'+
+            'Sua presen&ccedil;a foi registrada'+(horaValidacao(p)?' &agrave;s '+horaValidacao(p):'')+' e est&aacute; sendo validada durante o evento. '+
+            'O comprovante de participa&ccedil;&atilde;o ficar&aacute; dispon&iacute;vel aqui ao t&eacute;rmino da palestra.'+
+          '</div></div>';
+        lista.appendChild(t);
+
+      } else { // participacao
+        t.innerHTML = cabecalho + corpo +
+          '<div class="ing-status participacao"><svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><path d="M22 4L12 14.01l-3-3"/></svg><div>'+
+            '<strong>Comprovante de participa&ccedil;&atilde;o</strong>'+
+            'Confirmamos a participa&ccedil;&atilde;o de <strong style="display:inline">'+escapeHtml(p.nome||"")+'</strong> na palestra acima, realizada em 21/07/2026'+
+            (horaValidacao(p)?', com presen&ccedil;a validada &agrave;s '+horaValidacao(p):'')+'.'+
+          '</div></div>';
+        var b2=document.createElement("button"); b2.className="btn-baixar-ing";
+        b2.innerHTML='<svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Baixar comprovante de participação';
+        b2.onclick=function(){ baixarIngresso(t, p.token, "participacao_"); };
+        lista.appendChild(t); lista.appendChild(b2);
+      }
     });
     document.getElementById("tela-form").style.display="none";
     document.getElementById("tela-resultado").style.display="block";
   }
 
-  function baixarIngresso(el, token) {
+  function baixarIngresso(el, token, prefixo) {
     if (typeof html2canvas !== "function") { window.print(); return; }
     html2canvas(el, { backgroundColor:"#ffffff", scale:2, useCORS:true }).then(function(canvas){
       canvas.toBlob(function(blob){
         if (!blob) { window.print(); return; }
-        var a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download="comprovante_"+token+".png";
+        var a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download=(prefixo||"comprovante_")+token+".png";
         document.body.appendChild(a); a.click(); a.remove(); setTimeout(function(){ URL.revokeObjectURL(a.href); },1500);
       });
     }).catch(function(){ window.print(); });
@@ -362,6 +432,22 @@
 
   function nomePeriodo(periodo, id){ if(periodo) return periodo; if(/_M\d*$/.test(id||""))return "Manhã"; if(/_T\d*$/.test(id||""))return "Tarde"; if(/_N\d*$/.test(id||""))return "Noite"; return "Sessão"; }
   function horaDoId(id){ if(/_M\d*$/.test(id||""))return "08:00"; if(/_T\d*$/.test(id||""))return "14:00"; if(/_N\d*$/.test(id||""))return "19:00"; return ""; }
+
+  // Estado da sessão: inscricao (sem presença) / andamento (presente, dentro das 4h) / participacao (após 4h)
+  var EVT_ANO=2026, EVT_MES=6, EVT_DIA=21;      // 21/07/2026 (mês 0-based)
+  var DURACAO_MS=4*60*60*1000;                  // palestra dura 4 horas
+  function inicioSessao(p){
+    var hm=(p.hora||horaDoId(p.palestra_id)||"08:00").split(":");
+    return new Date(EVT_ANO,EVT_MES,EVT_DIA,parseInt(hm[0],10)||0,parseInt(hm[1],10)||0,0,0);
+  }
+  function estadoSessao(p){
+    if(!p.presente) return "inscricao";
+    return (Date.now() < inicioSessao(p).getTime()+DURACAO_MS) ? "andamento" : "participacao";
+  }
+  function horaValidacao(p){
+    if(!p.data_presenca) return "";
+    try{ var d=new Date(p.data_presenca); return ("0"+d.getHours()).slice(-2)+":"+("0"+d.getMinutes()).slice(-2); }catch(e){ return ""; }
+  }
   function voltar(){ document.getElementById("tela-resultado").style.display="none"; document.getElementById("tela-form").style.display="block"; document.getElementById("inputBusca").value=""; document.getElementById("msgForm").className="msg"; }
   document.getElementById("inputBusca").addEventListener("keydown", function(e){ if(e.key==="Enter") buscar(); });
 </script>
