@@ -1,17 +1,19 @@
 -- ============================================================
---  HOTFIX: local da GESTAO_DEMOCRATICA_M estava errado no banco.
---  Oficial (doc LOCAIS E PALESTRANTES): manhã = UNIP, tarde = SENAI.
---  O banco estava com SENAI nos DOIS períodos — o e-mail de
---  confirmação e o comprovante da consulta usam esse campo.
---  Rode no SQL Editor do Supabase ANTES de disparar os e-mails.
+--  GESTÃO DEMOCRÁTICA: confirmado com a organização — os DOIS
+--  períodos são no SENAI.
+--
+--  Este arquivo substitui a versão anterior (que mandava trocar a
+--  manhã para UNIP — NÃO use aquela). Se você chegou a rodar a
+--  versão anterior, rode este UPDATE para voltar ao correto.
+--  Se nunca rodou nada, pode rodar mesmo assim — é idempotente.
 -- ============================================================
 
 update presenca.palestras
-set local    = 'UNIP',
-    endereco = 'Av. Carlos Consoni, 10 - Jardim Canadá'
-where id = 'GESTAO_DEMOCRATICA_M';
+set local    = 'SENAI',
+    endereco = 'Rua Capitão Salomão, 1813 - Campos Elíseos'
+where id in ('GESTAO_DEMOCRATICA_M', 'GESTAO_DEMOCRATICA_T');
 
--- Conferência: manhã deve ser UNIP, tarde SENAI.
+-- Conferência: os dois períodos devem mostrar SENAI.
 select id, periodo, local, endereco
 from presenca.palestras
 where id like 'GESTAO_DEMOCRATICA%'
