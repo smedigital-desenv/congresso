@@ -276,18 +276,7 @@
     {t:"Da memória ao futuro: pertencimento e identidade na formação da cidadania", p:"José Antonio Correa Lages", l:"Auditório Meira Junior", h:["Manhã 08h","Tarde 14h"]},
     {t:"A Mochila do Educador: nossas memórias como ponte para o pertencimento", p:"Ana Paula Silveira", l:"Teatro Municipal", h:["Manhã 08h","Tarde 14h"]}
   ];
-  (function(){
-    var g=document.getElementById("gridPrograma"), html="";
-    PROGRAMA.forEach(function(x){
-      html+='<div class="pcard"><h3>'+escapeHtml(x.t)+'</h3>'+
-        '<div class="pal">'+escapeHtml(x.p)+'</div>'+
-        '<div class="loc"><svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 12-9 12s-9-5-9-12a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>'+escapeHtml(x.l)+'</div>'+
-        '<div class="times">'+x.h.map(function(h){return '<span class="time">'+escapeHtml(h)+'</span>';}).join("")+'</div></div>';
-    });
-    g.innerHTML=html;
-  })();
-
-  // Palestrantes por palestra (sufixo _M/_T/_N removido) — para o ingresso.
+  // Palestrantes por palestra (sufixo _M/_T/_N removido) — para o ingresso e a programação.
   var PALESTRANTES = {
     "MOCHILA":"Ana Paula Silveira","ALFABETIZACAO":"Soraya Maria Romano Pacifico",
     "ALEM_TELAS":"Vivian Caroline Coraucci","CRIANDO_PONTES":"Dra Margherita Midea Cuccovia, Andresa Andrade e Amanda Correa",
@@ -296,6 +285,50 @@
     "INFANCIA_ATIVIDADE":"Hugo Tourinho","EJA":"Erika Osakabe","PRETO_CAFE":"Dagoberto Jose Fonseca","QUEM_BRINCA":"Tatiana Noronha"
   };
   function palestranteDe(id){ return PALESTRANTES[String(id||"").replace(/_(M|T|N)\d*$/,"")] || ""; }
+
+  // A programação carrega do Supabase (fonte da verdade: presenca.palestras).
+  // A lista fixa PROGRAMA acima fica só como fallback se a rede falhar.
+  function renderPrograma(lista){
+    var g=document.getElementById("gridPrograma"), html="";
+    lista.forEach(function(x){
+      html+='<div class="pcard"><h3>'+escapeHtml(x.t)+'</h3>'+
+        (x.p?'<div class="pal">'+escapeHtml(x.p)+'</div>':'')+
+        '<div class="loc"><svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 12-9 12s-9-5-9-12a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>'+escapeHtml(x.l)+'</div>'+
+        '<div class="times">'+x.h.map(function(h){return '<span class="time">'+escapeHtml(h)+'</span>';}).join("")+'</div></div>';
+    });
+    g.innerHTML=html;
+  }
+  (function(){
+    fetch(SUPA_URL + "/palestras?select=id,nome,local,periodo,hora&order=nome,periodo", { headers: supaHeaders() })
+      .then(function(r){ if(!r.ok) throw new Error("http"); return r.json(); })
+      .then(function(data){
+        if (!Array.isArray(data) || data.length===0) throw new Error("vazio");
+        // Agrupa as sessões (manhã/tarde/noite) da mesma palestra
+        var ordem={"Manhã":1,"Tarde":2,"Noite":3};
+        var grupos={}, chaves=[];
+        data.forEach(function(s){
+          var base=String(s.id||"").replace(/_(M|T|N)\d*$/,"");
+          if(!grupos[base]){ grupos[base]={t:s.nome||base, sessoes:[]}; chaves.push(base); }
+          grupos[base].sessoes.push(s);
+        });
+        var lista=chaves.map(function(k){
+          var gpo=grupos[k];
+          gpo.sessoes.sort(function(a,b){ return (ordem[periodoCurto(a.periodo)]||9)-(ordem[periodoCurto(b.periodo)]||9); });
+          var locais=[]; gpo.sessoes.forEach(function(s){ if(s.local && locais.indexOf(s.local)===-1) locais.push(s.local); });
+          var l = locais.length<=1
+            ? (locais[0]||"-")
+            : gpo.sessoes.map(function(s){ return (s.local||"-")+" ("+periodoCurto(s.periodo).toLowerCase()+")"; }).join(" · ");
+          var h = gpo.sessoes.map(function(s){
+            var per=periodoCurto(s.periodo)||"Sessão";
+            var hr=(s.hora||"").replace(/:00$/,"h").replace(":",""); if(hr && !/h$/.test(hr)) hr+="h";
+            return per+(hr?" "+hr:"");
+          });
+          return { t:gpo.t.replace(/\.$/,""), p:palestranteDe(k), l:l, h:h };
+        }).sort(function(a,b){ return a.t.localeCompare(b.t,"pt"); });
+        renderPrograma(lista);
+      })
+      .catch(function(){ renderPrograma(PROGRAMA); });
+  })();
 
   // ---------- CONSULTA ----------
   function buscar() {
