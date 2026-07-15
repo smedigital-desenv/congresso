@@ -103,6 +103,10 @@
         <button class="btn btn-primary" onclick="irParaValidar()">Validar presenca</button>
       </div>
     </div>
+    <a id="btnVagas" href="vagas.html" style="display:none;align-items:center;justify-content:center;gap:8px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:13px;margin-top:12px;color:var(--text);font:600 14px 'DM Sans';text-decoration:none;">
+      <svg viewBox="0 0 24 24" style="width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>
+      Acompanhamento de vagas (lotação)
+    </a>
   </div>
 </div>
 
@@ -165,6 +169,7 @@
     document.getElementById("etapa-token").style.display= "block";
     if (LISTA_PERMITIDOS.indexOf(String(email||"").toLowerCase()) !== -1) {
       document.getElementById("btnLista").style.display = "flex";
+      document.getElementById("btnVagas").style.display = "flex";
     }
     garantirCache(function(total){
       var st = document.getElementById("cacheStatus");
