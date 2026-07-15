@@ -142,10 +142,10 @@
           (pal.local ? " · " + escapeHtml(pal.local) : "") + '</div>' +
         (pal.endereco ? '<div class="f-sub">' + escapeHtml(pal.endereco) + '</div>' : "") +
       '</div><div class="f-meta">Congresso Municipal da Educação<br>Educar para COMviver<br>Emitido em ' + escapeHtml(agora) + '</div></div>' +
-      '<table><thead><tr><th style="width:30px">#</th><th>Nome</th><th style="width:90px">Código</th></tr></thead><tbody>';
+      '<table><thead><tr><th style="width:30px">#</th><th>Nome</th><th style="width:90px">Código</th><th style="width:150px">Assinatura</th></tr></thead><tbody>';
     lista.forEach(function(x, i){
       h += '<tr><td>' + (i+1) + '</td><td class="nm">' + escapeHtml(x.nome||"") + '</td>' +
-           '<td class="tk">' + escapeHtml(x.token) + '</td></tr>';
+           '<td class="tk">' + escapeHtml(x.token) + '</td><td></td></tr>';
     });
     h += '</tbody></table>' +
       '<div class="tot">Total de inscritos: ' + lista.length + (pres ? ' · Presenças já validadas: ' + pres : '') + '</div>' +
