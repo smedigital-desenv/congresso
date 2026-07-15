@@ -31,9 +31,10 @@
     .f-title{font-size:17px;font-weight:700;color:#173257;line-height:1.3;}
     .f-sub{font-size:12.5px;color:#555;margin-top:3px;}
     .f-meta{font-size:12px;color:#555;text-align:right;white-space:nowrap;}
-    table{width:100%;border-collapse:collapse;font-size:12.5px;margin-top:10px;}
+    table{width:100%;border-collapse:collapse;font-size:12.5px;margin-top:10px;table-layout:fixed;}
     th{background:#eef3f8;color:#173257;text-align:left;padding:7px 9px;border:1px solid #d7dfe8;font-size:11px;text-transform:uppercase;letter-spacing:.4px;}
-    td{padding:6px 9px;border:1px solid #e3e8ee;vertical-align:top;}
+    td{padding:5px 9px;border:1px solid #e3e8ee;vertical-align:middle;white-space:nowrap;}
+    td.nm{overflow:hidden;text-overflow:ellipsis;}
     tr:nth-child(even) td{background:#f7f9fb;}
     .tk{font-family:monospace;white-space:nowrap;}
     .assin{margin-top:6px;font-size:11px;color:#888;}
@@ -141,11 +142,10 @@
           (pal.local ? " · " + escapeHtml(pal.local) : "") + '</div>' +
         (pal.endereco ? '<div class="f-sub">' + escapeHtml(pal.endereco) + '</div>' : "") +
       '</div><div class="f-meta">Congresso Municipal da Educação<br>Educar para COMviver<br>Emitido em ' + escapeHtml(agora) + '</div></div>' +
-      '<table><thead><tr><th style="width:26px">#</th><th>Nome</th><th style="width:70px">Token</th><th>Unidade</th><th style="width:140px">Assinatura</th></tr></thead><tbody>';
+      '<table><thead><tr><th style="width:30px">#</th><th>Nome</th><th style="width:90px">Código</th></tr></thead><tbody>';
     lista.forEach(function(x, i){
-      h += '<tr><td>' + (i+1) + '</td><td>' + escapeHtml(x.nome||"") + '</td>' +
-           '<td class="tk">' + escapeHtml(x.token) + '</td>' +
-           '<td>' + escapeHtml(x.unidade||"") + '</td><td></td></tr>';
+      h += '<tr><td>' + (i+1) + '</td><td class="nm">' + escapeHtml(x.nome||"") + '</td>' +
+           '<td class="tk">' + escapeHtml(x.token) + '</td></tr>';
     });
     h += '</tbody></table>' +
       '<div class="tot">Total de inscritos: ' + lista.length + (pres ? ' · Presenças já validadas: ' + pres : '') + '</div>' +
