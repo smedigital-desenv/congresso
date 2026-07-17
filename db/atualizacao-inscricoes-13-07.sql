@@ -13,7 +13,6 @@
 --  7) Mara (41747): mantém as DUAS palestras (formulário de 06/07)
 --  8) Luciano Santos Toniolo (45168): inscrição de última hora
 --  9) Avulsos: André (49633) + convidadas externas Elisa e Tássia
---  10) Consulta no site passa a aceitar também o token/código SME
 --  Rode TUDO de uma vez no SQL Editor do Supabase.
 -- ============================================================
 
@@ -358,42 +357,10 @@ on conflict (token) do update set nome=excluded.nome, email=excluded.email, pale
 insert into presenca.participantes (token,nome,email,cpf,palestra_id,codigo_funcional,origem,unidade) values
 ('49633','Andre de Jesus Minchio','andrem@educacao.pmrp.sp.gov.br',NULL,'PRETO_CAFE_T','49633','OFICIAL','FAUSTINO JARRUCHE, EMEF'),
 ('SME123','Elisa Lunardi',NULL,NULL,'EDUCAR_CONVIVER_M',NULL,'CONVIDADA','Convidada externa'),
-('SME124','Tassia Veiga Faccioli',NULL,NULL,'QUEM_BRINCA_M',NULL,'CONVIDADA','Escola parceira')
+('SME124','Tassia Veiga Faccioli','tassiafaccioli.florianete@gmail.com',NULL,'QUEM_BRINCA_M',NULL,'CONVIDADA','Escola parceira')
 on conflict (token) do update set nome=excluded.nome, palestra_id=excluded.palestra_id, origem=excluded.origem, unidade=excluded.unidade;
 
 commit;
-
--- 10) CONSULTA PELO TOKEN/CÓDIGO SME (ex.: SME123) -----------------
---     A busca da consulta passa a aceitar também o token, além de
---     código funcional e e-mail — necessário para convidados sem
---     e-mail (Elisa SME123, Tássia SME124) e útil para todos os SME.
-create or replace function presenca.consultar_inscricao_busca(p_busca text)
-returns table (
-  token         text,
-  nome          text,
-  email         text,
-  palestra_id   text,
-  palestra_nome text,
-  local         text,
-  endereco      text,
-  periodo       text,
-  hora          text
-)
-language sql
-security definer
-set search_path = presenca
-as $$
-  select p.token, p.nome, p.email, p.palestra_id,
-         pl.nome, pl.local, pl.endereco, pl.periodo, pl.hora
-  from presenca.participantes p
-  left join presenca.palestras pl on pl.id = p.palestra_id
-  where lower(trim(p.email)) = lower(trim(p_busca))
-     or p.codigo_funcional   = trim(p_busca)
-     or upper(p.token)       = upper(trim(p_busca))
-  order by p.palestra_id;
-$$;
-
-grant execute on function presenca.consultar_inscricao_busca(text) to anon, authenticated;
 
 -- CONFERÊNCIA ------------------------------------------------------
 select count(*) as total_participantes from presenca.participantes;
