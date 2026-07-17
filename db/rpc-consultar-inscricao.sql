@@ -1,5 +1,5 @@
 -- ============================================================
---  RPC de consulta da inscrição por CÓDIGO FUNCIONAL ou E-MAIL.
+--  RPC de consulta da inscrição por CÓDIGO FUNCIONAL, E-MAIL ou TOKEN.
 --  SECURITY DEFINER: devolve só as linhas que batem, sem expor a
 --  tabela participantes inteira ao papel anon. Usada pela inscricao.html.
 --  Rode no SQL Editor do Supabase.
@@ -27,6 +27,7 @@ as $$
   left join presenca.palestras pl on pl.id = p.palestra_id
   where lower(trim(p.email)) = lower(trim(p_busca))
      or p.codigo_funcional   = trim(p_busca)
+     or upper(p.token)       = upper(trim(p_busca))  -- token (ex.: SME123, 12345_M)
   order by p.palestra_id;
 $$;
 
