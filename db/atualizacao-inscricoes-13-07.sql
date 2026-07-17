@@ -351,11 +351,11 @@ insert into presenca.participantes (token,nome,email,cpf,palestra_id,codigo_func
 on conflict (token) do update set nome=excluded.nome, email=excluded.email, palestra_id=excluded.palestra_id, unidade=excluded.unidade;
 
 -- 9) INSCRIÇÕES AVULSAS (convidados do Christian) ------------------
---    André (49633): rede municipal, recebe e-mail normalmente.
+--    André (49633): rede municipal, recebe o comprovante por e-mail.
 --    Elisa e Tássia: EXTERNAS (sem código e sem e-mail -> não entram
 --    no envio de QR; constam nas listas e podem ser validadas pelo token SME).
 insert into presenca.participantes (token,nome,email,cpf,palestra_id,codigo_funcional,origem,unidade) values
-('49633','Andre de Jesus Minchio',NULL,NULL,'PRETO_CAFE_T','49633','OFICIAL',NULL),
+('49633','Andre de Jesus Minchio','andrem@educacao.pmrp.sp.gov.br',NULL,'PRETO_CAFE_T','49633','OFICIAL','FAUSTINO JARRUCHE, EMEF'),
 ('SME123','Elisa Lunardi',NULL,NULL,'EDUCAR_CONVIVER_M',NULL,'CONVIDADA','Convidada externa'),
 ('SME124','Tassia Veiga Faccioli',NULL,NULL,'QUEM_BRINCA_M',NULL,'CONVIDADA','Escola parceira')
 on conflict (token) do update set nome=excluded.nome, palestra_id=excluded.palestra_id, origem=excluded.origem, unidade=excluded.unidade;
