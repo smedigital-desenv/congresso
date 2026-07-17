@@ -12,6 +12,7 @@
 --     rodou algum deles, não muda nada; se não rodou, aplica agora)
 --  7) Mara (41747): mantém as DUAS palestras (formulário de 06/07)
 --  8) Luciano Santos Toniolo (45168): inscrição de última hora
+--  9) Avulsos: André (49633) + convidadas externas Elisa e Tássia
 --  Rode TUDO de uma vez no SQL Editor do Supabase.
 -- ============================================================
 
@@ -349,6 +350,16 @@ insert into presenca.participantes (token,nome,email,cpf,palestra_id,codigo_func
 ('45168','LUCIANO SANTOS TONIOLO','lucianotoniolo@educacao.pmrp.sp.gov.br',NULL,'ALEM_TELAS_M','45168','OFICIAL','GERALDA DE SOUZA ESPIN, EMEF')
 on conflict (token) do update set nome=excluded.nome, email=excluded.email, palestra_id=excluded.palestra_id, unidade=excluded.unidade;
 
+-- 9) INSCRIÇÕES AVULSAS (convidados do Christian) ------------------
+--    André (49633): rede municipal, recebe e-mail normalmente.
+--    Elisa e Tássia: EXTERNAS (sem código e sem e-mail -> não entram
+--    no envio de QR; constam nas listas e podem ser validadas pelo token).
+insert into presenca.participantes (token,nome,email,cpf,palestra_id,codigo_funcional,origem,unidade) values
+('49633','Andre de Jesus Minchio',NULL,NULL,'PRETO_CAFE_T','49633','OFICIAL',NULL),
+('CONV01','Elisa Lunardi',NULL,NULL,'EDUCAR_CONVIVER_M',NULL,'CONVIDADA','Convidada externa'),
+('CONV02','Tassia Veiga Faccioli',NULL,NULL,'QUEM_BRINCA_M',NULL,'CONVIDADA','Escola parceira')
+on conflict (token) do update set nome=excluded.nome, palestra_id=excluded.palestra_id, origem=excluded.origem, unidade=excluded.unidade;
+
 commit;
 
 -- CONFERÊNCIA ------------------------------------------------------
@@ -356,5 +367,6 @@ select count(*) as total_participantes from presenca.participantes;
 select palestra_id, count(*) from presenca.participantes
 where palestra_id like 'DIALOGOS%' group by palestra_id order by 1;  -- esperado: 47 M / 50 T
 select token, nome, palestra_id from presenca.participantes
-where codigo_funcional in ('41747','45168','50402','50460','40030','38268')
-order by nome, token;  -- Mara 2 linhas (_M/_T), Luciano, Gabrielas, Cristopher
+where codigo_funcional in ('41747','45168','50402','50460','40030','38268','49633')
+   or token in ('CONV01','CONV02')
+order by nome, token;  -- Mara 2 linhas, Luciano, Gabrielas, Cristopher, Andre, Elisa, Tassia
