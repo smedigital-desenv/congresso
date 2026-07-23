@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png?v=1">
+  <link rel="icon" href="favicon.ico?v=1">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png?v=1">
+  <title>Congresso da Rede Municipal de Ensino 2026 — Educar para COMviver</title>
+  <meta name="description" content="Educar para COMviver — Ribeirão 170 anos: memória, transformação e identidade. Congresso da Rede Municipal de Ensino, 21 de julho de 2026. Consulte sua inscrição e baixe seu comprovante.">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Serif+Display&family=DM+Mono:wght@500&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg:#f6f3ec; --surface:#ffffff; --soft:#efeadd;
+      --navy:#173257; --navy2:#1f4e79; --blue:#3f7fd0;
+      --green:#2f8f5b; --green2:#2e7d4f; --gold:#c2892f; --berry:#a5342a;
+      --ink:#1e2530; --muted:#5f6875; --faint:#8a92a0; --line:#e6e0d1;
+      --radius:16px;
+    }
+    *{box-sizing:border-box;margin:0;padding:0;}
+    html{scroll-behavior:smooth;}
+    body{font-family:'DM Sans',system-ui,sans-serif;background:var(--bg);color:var(--ink);line-height:1.6;-webkit-font-smoothing:antialiased;}
+    img{max-width:100%;display:block;}
+    a{color:inherit;}
+    .wrap{max-width:1080px;margin:0 auto;padding:0 20px;}
+    .serif{font-family:'DM Serif Display',Georgia,serif;font-weight:400;}
+
+    /* ---- HEADER ---- */
+    header.top{position:sticky;top:0;z-index:50;background:rgba(246,243,236,.9);backdrop-filter:blur(10px);border-bottom:1px solid var(--line);}
+    .top .wrap{display:flex;align-items:center;justify-content:space-between;height:60px;gap:12px;}
+    .brand{display:flex;align-items:center;gap:10px;font-weight:700;color:var(--navy);font-size:15px;letter-spacing:-.01em;}
+    .brand .dot{width:10px;height:10px;border-radius:50%;background:linear-gradient(135deg,var(--navy2),var(--green));flex:none;}
+    .brand small{display:block;font-weight:500;color:var(--muted);font-size:11px;letter-spacing:.02em;}
+    .nav-cta{background:var(--navy);color:#fff;border:none;border-radius:999px;padding:10px 18px;font:600 13px 'DM Sans',sans-serif;cursor:pointer;text-decoration:none;white-space:nowrap;transition:background .2s;}
+    .nav-cta:hover{background:var(--navy2);}
+    .nav-actions{display:flex;align-items:center;gap:16px;}
+    .nav-link{font:600 13px 'DM Sans',sans-serif;color:var(--navy);text-decoration:none;white-space:nowrap;}
+    .nav-link:hover{color:var(--navy2);text-decoration:underline;}
+    @media (max-width:600px){.nav-link{display:none;} .brand small{display:none;}}
+
+    /* ---- HERO ---- */
+    .hero{position:relative;overflow:hidden;background:
+      radial-gradient(ellipse 70% 60% at 85% 10%,rgba(63,127,208,.14),transparent 60%),
+      radial-gradient(ellipse 60% 60% at 5% 90%,rgba(47,143,91,.14),transparent 60%),
+      var(--bg);}
+    .hero .wrap{display:grid;grid-template-columns:1.15fr .85fr;gap:40px;align-items:center;padding:24px 20px 52px;}
+    .eyebrow{font:600 12px 'DM Sans',sans-serif;letter-spacing:.16em;text-transform:uppercase;color:var(--gold);margin-bottom:14px;}
+    .hero h1{font-size:clamp(38px,7vw,68px);line-height:.98;letter-spacing:-.03em;font-weight:700;color:var(--navy);}
+    .hero h1 .com{color:var(--navy);} .hero h1 .viver{color:var(--green);}
+    .hero .tema{font-size:clamp(17px,2.4vw,22px);color:var(--navy2);margin-top:18px;max-width:20ch;line-height:1.35;}
+    .hero .tema b{color:var(--green2);font-style:italic;}
+    .chips{display:flex;flex-wrap:wrap;gap:10px;margin-top:26px;}
+    .chip{display:inline-flex;align-items:center;gap:7px;background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:8px 15px;font-size:13.5px;font-weight:500;color:var(--ink);}
+    .chip svg{width:15px;height:15px;stroke:var(--navy2);fill:none;stroke-width:1.8;}
+    .hero-actions{margin-top:30px;display:flex;flex-wrap:wrap;gap:12px;}
+    .btn-lg{border:none;border-radius:12px;padding:15px 26px;font:600 15px 'DM Sans',sans-serif;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:9px;transition:transform .1s,box-shadow .2s;}
+    .btn-lg:active{transform:scale(.98);}
+    .btn-primary{background:linear-gradient(135deg,var(--navy2),var(--green));color:#fff;box-shadow:0 8px 22px rgba(31,78,121,.28);}
+    .btn-outline{background:transparent;color:var(--navy);border:1.5px solid var(--navy);}
+    .hero-art{display:flex;justify-content:center;}
+    .hero-art img{width:min(360px,80vw);filter:drop-shadow(0 18px 40px rgba(23,50,87,.18));}
+    .hero-mark{width:min(340px,78vw);aspect-ratio:1;border-radius:50%;background:var(--surface);border:1px solid var(--line);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:34px;box-shadow:0 18px 44px rgba(23,50,87,.14);}
+    .hero-mark .k{font:600 11px 'DM Sans';letter-spacing:.18em;text-transform:uppercase;color:var(--gold);}
+    .hero-mark .n{font-size:clamp(64px,16vw,104px);line-height:1;font-weight:700;background:linear-gradient(135deg,var(--navy2),var(--green));-webkit-background-clip:text;background-clip:text;color:transparent;margin:6px 0;}
+    .hero-mark .a{font:600 13px 'DM Sans';letter-spacing:.3em;color:var(--navy);}
+
+    /* ---- SECTIONS ---- */
+    section{padding:56px 0;}
+    .sec-head{text-align:center;max-width:640px;margin:0 auto 34px;}
+    .sec-tag{font:600 12px 'DM Sans';letter-spacing:.16em;text-transform:uppercase;color:var(--green2);margin-bottom:10px;}
+    .sec-head h2{font-size:clamp(26px,4vw,36px);color:var(--navy);letter-spacing:-.02em;line-height:1.1;}
+    .sec-head p{color:var(--muted);margin-top:12px;font-size:16px;}
+    .sobre{background:var(--soft);}
+    .lead{max-width:760px;margin:0 auto;text-align:center;font-size:clamp(17px,2.2vw,20px);color:var(--ink);line-height:1.6;}
+    .lead .serif{color:var(--navy2);}
+
+    /* ---- PROGRAMA ---- */
+    .grid-prog{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px;}
+    .pcard{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:20px;display:flex;flex-direction:column;gap:8px;transition:transform .15s,box-shadow .2s;}
+    .pcard:hover{transform:translateY(-3px);box-shadow:0 14px 30px rgba(23,50,87,.1);}
+    .pcard h3{font-size:16px;line-height:1.3;color:var(--navy);letter-spacing:-.01em;}
+    .pcard .pal{font-size:13.5px;color:var(--green2);font-weight:600;}
+    .pcard .loc{font-size:13px;color:var(--muted);display:flex;gap:7px;align-items:flex-start;margin-top:2px;}
+    .pcard .loc svg{width:15px;height:15px;stroke:var(--gold);fill:none;stroke-width:1.8;flex:none;margin-top:2px;}
+    .pcard .times{display:flex;gap:6px;flex-wrap:wrap;margin-top:auto;padding-top:10px;}
+    .time{font:600 11.5px 'DM Sans';letter-spacing:.02em;padding:4px 10px;border-radius:7px;background:var(--soft);color:var(--navy2);border:1px solid var(--line);}
+
+    /* ---- CONSULTA ---- */
+    .consulta{background:var(--bg);}
+    .form-card{max-width:460px;margin:0 auto;background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:26px;box-shadow:0 12px 30px rgba(23,50,87,.08);}
+    label{display:block;font:600 11px 'DM Sans';text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:8px;}
+    input{width:100%;background:var(--bg);border:1px solid var(--line);border-radius:11px;padding:14px 16px;font-size:15px;font-family:'DM Sans';color:var(--ink);outline:none;transition:border-color .2s,box-shadow .2s;}
+    input:focus{border-color:var(--navy2);box-shadow:0 0 0 3px rgba(31,78,121,.13);}
+    .btn{width:100%;padding:15px;border:none;border-radius:12px;font:600 16px 'DM Sans';cursor:pointer;transition:opacity .15s,transform .1s;margin-top:14px;}
+    .btn:active{transform:scale(.98);} .btn:disabled{opacity:.5;cursor:not-allowed;}
+    .btn-go{background:linear-gradient(135deg,var(--navy2),var(--green));color:#fff;box-shadow:0 6px 18px rgba(31,78,121,.25);}
+    .btn-ghost{background:transparent;color:var(--muted);border:1px solid var(--line);margin-top:10px;font-size:14px;}
+    .msg{margin-top:14px;padding:12px 14px;border-radius:10px;font-size:13.5px;line-height:1.5;display:none;}
+    .msg.erro{background:#fdecea;color:#a5342a;border:1px solid #f3c9c4;display:block;}
+    .msg.info{background:#e9f1fb;color:#1f4e79;border:1px solid #cfe0f4;display:block;}
+    #tela-resultado{display:none;max-width:460px;margin:0 auto;}
+    .saudacao{font-size:17px;color:var(--navy);font-weight:600;}
+    .hint{font-size:13px;color:var(--muted);margin-top:2px;}
+    .res-top{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px 20px;margin-bottom:14px;}
+
+    /* ---- INGRESSO ---- */
+    .ingresso{background:#fff;color:#16181d;border-radius:18px;overflow:hidden;margin-bottom:14px;box-shadow:0 14px 34px rgba(23,50,87,.14);border:1px solid var(--line);}
+    .ing-head{background:linear-gradient(135deg,var(--navy2),var(--green));color:#fff;padding:16px 22px;}
+    .ing-evento{font-size:10.5px;letter-spacing:1.2px;text-transform:uppercase;opacity:.92;}
+    .ing-tema{font-size:13px;font-weight:600;margin-top:3px;line-height:1.3;}
+    .ing-nome{font-size:21px;font-weight:700;letter-spacing:-.01em;margin:16px 22px 1px;color:var(--navy);}
+    .ing-sub{font-size:10.5px;color:#8a90a0;margin:0 22px 14px;text-transform:uppercase;letter-spacing:1px;}
+    .ing-body{padding:0 22px;}
+    .ing-palestra{font-size:15px;font-weight:600;color:#16181d;line-height:1.35;margin-bottom:3px;}
+    .ing-palestrante{font-size:13px;color:var(--green2);font-weight:600;margin-bottom:16px;}
+    .ing-grid{display:flex;gap:8px;margin-bottom:14px;}
+    .ing-info{flex:1;}
+    .ing-info .k{font-size:9.5px;color:#9aa0aa;text-transform:uppercase;letter-spacing:.6px;}
+    .ing-info .v{font-size:14px;color:#16181d;font-weight:700;margin-top:2px;}
+    .ing-local{font-size:13.5px;color:#2a2e37;line-height:1.4;margin-bottom:8px;}
+    .ing-local .end{color:#8a90a0;font-size:12px;}
+    .ing-divider{position:relative;border-top:2px dashed #d9dce2;margin:6px 22px;}
+    .ing-divider::before,.ing-divider::after{content:"";position:absolute;top:-12px;width:22px;height:22px;border-radius:50%;background:var(--bg);}
+    .ing-divider::before{left:-33px;} .ing-divider::after{right:-33px;}
+    .ing-qr{text-align:center;padding:16px 22px 22px;}
+    .ing-qr img{width:200px;height:200px;background:#fff;border-radius:10px;display:block;margin:0 auto;}
+    .ing-token{font-family:'DM Mono',monospace;font-size:12px;color:#7a8090;margin-top:8px;letter-spacing:1.5px;}
+    .ing-foot{font-size:11px;color:#9aa0aa;margin-top:5px;}
+    .btn-baixar-ing{width:100%;padding:12px;border-radius:11px;border:1px solid var(--line);background:var(--surface);color:var(--navy);font:600 14px 'DM Sans';cursor:pointer;margin:-4px 0 16px;display:flex;align-items:center;justify-content:center;gap:8px;}
+    .btn-baixar-ing svg,.btn-print svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
+    .btn-print{width:100%;padding:14px;border-radius:12px;border:1px solid var(--navy);background:var(--navy);color:#fff;font:600 15px 'DM Sans';cursor:pointer;margin-bottom:10px;display:flex;align-items:center;justify-content:center;gap:8px;}
+    /* ---- ESTADO DA SESSÃO (andamento / participação) ---- */
+    .ing-status{padding:15px 22px;display:flex;gap:11px;align-items:flex-start;line-height:1.5;font-size:13.5px;}
+    .ing-status svg{width:20px;height:20px;flex-shrink:0;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;margin-top:1px;}
+    .ing-status strong{display:block;font-size:15px;margin-bottom:2px;}
+    .ing-status.andamento{background:#fdf6e3;color:#8a5a00;border-top:1px solid #f0e2b8;}
+    .ing-status.andamento svg{stroke:#c2892f;}
+    .ing-status.participacao{background:#e9f7ee;color:#1b6e3a;border-top:1px solid #bfe6cd;}
+    .ing-status.participacao svg{stroke:#2f8f5b;}
+    .ing-selo{display:inline-flex;align-items:center;gap:6px;background:#e9f7ee;color:#1b6e3a;border:1px solid #bfe6cd;border-radius:999px;padding:3px 11px;font-size:11px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;margin:0 22px 14px;}
+    .pulso{width:9px;height:9px;border-radius:50%;background:#c2892f;box-shadow:0 0 0 0 rgba(194,137,47,.5);animation:pulso 1.6s infinite;}
+    @keyframes pulso{0%{box-shadow:0 0 0 0 rgba(194,137,47,.5);}70%{box-shadow:0 0 0 8px rgba(194,137,47,0);}100%{box-shadow:0 0 0 0 rgba(194,137,47,0);}}
+
+    /* ---- FOOTER ---- */
+    footer{background:var(--navy);color:#cdd6e2;padding:34px 0;text-align:center;font-size:13.5px;}
+    footer b{color:#fff;} footer .fmark{font-weight:700;color:#fff;font-size:16px;margin-bottom:6px;}
+
+    @media (max-width:820px){
+      .hero .wrap{grid-template-columns:1fr;text-align:center;gap:24px;padding:40px 20px 48px;}
+      .hero-art{order:-1;} .chips,.hero-actions{justify-content:center;} .hero .tema{margin-left:auto;margin-right:auto;}
+    }
+    @media print{
+      body{background:#fff;} header.top,.hero,.sobre,#programa,#tela-form,.sec-head,.btn-ghost,.btn-print,.btn-baixar-ing,.res-top,footer,.menu-global{display:none!important;}
+      section{padding:0;} .ingresso{box-shadow:none;page-break-inside:avoid;margin:0 0 14px;}
+      .ing-divider::before,.ing-divider::after{background:#fff;}
+    }
+  </style>
+</head>
+<body>
+<script src="config.js?v=19"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+
+<header class="top">
+  <div class="wrap">
+    <div class="brand"><span class="dot"></span><span>Educar para COMviver<small>Congresso da Rede Municipal de Ensino · 2026</small></span></div>
+    <div class="nav-actions">
+      <a class="nav-link" href="fiscal.html">Acesso do fiscal</a>
+      <a class="nav-cta" href="#consulta">Consultar inscrição</a>
+    </div>
+  </div>
+</header>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="wrap">
+    <div>
+      <div class="eyebrow">Congresso da Rede Municipal de Ensino · 2026</div>
+      <h1>Educar para <span class="com">COM</span><span class="viver">viver</span></h1>
+      <p class="tema serif">Ribeirão 170 anos: <b>memória, transformação e identidade.</b></p>
+      <div class="chips">
+        <span class="chip"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>21 de julho de 2026</span>
+        <span class="chip"><svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 12-9 12s-9-5-9-12a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>Ribeirão Preto</span>
+        <span class="chip"><svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg>12 palestras</span>
+      </div>
+      <div class="hero-actions">
+        <a class="btn-lg btn-primary" href="#consulta">Consultar minha inscrição</a>
+        <a class="btn-lg btn-outline" href="#programa">Ver programação</a>
+      </div>
+    </div>
+    <div class="hero-art">
+      <img id="heroLogo" src="logo.png" alt="Educar para COMviver — Ribeirão 170 anos"
+           onerror="this.style.display='none';document.getElementById('heroMark').style.display='flex';">
+      <div class="hero-mark" id="heroMark" style="display:none">
+        <div class="k">Ribeirão</div><div class="n">170</div><div class="a">ANOS</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SOBRE -->
+<section class="sobre">
+  <div class="wrap">
+    <div class="sec-head"><div class="sec-tag">O Congresso</div><h2>Um dia de formação, troca e pertencimento</h2></div>
+    <p class="lead">Educadoras e educadores da rede municipal se reúnem para celebrar os <span class="serif">170 anos de Ribeirão Preto</span> e fortalecer a prática docente — memória, transformação e identidade em <b>12 palestras</b> distribuídas pela cidade, nos períodos da manhã e da tarde.</p>
+  </div>
+</section>
+
+<!-- PROGRAMA -->
+<section id="programa">
+  <div class="wrap">
+    <div class="sec-head"><div class="sec-tag">Programação</div><h2>As palestras</h2><p>Cada palestra acontece em um local do evento. Confira o seu na sua inscrição.</p></div>
+    <div class="grid-prog" id="gridPrograma"></div>
+  </div>
+</section>
+
+<!-- CONSULTA -->
+<section id="consulta" class="consulta">
+  <div class="wrap">
+    <div class="sec-head"><div class="sec-tag">Sua inscrição</div><h2>Consulte e baixe seu comprovante de inscrição</h2><p>Informe seu código funcional ou o e-mail usado na inscrição.</p></div>
+
+    <div id="tela-form">
+      <div class="form-card">
+        <label for="inputBusca">Código funcional ou e-mail</label>
+        <input type="text" id="inputBusca" placeholder="Ex.: 12345  ou  seu@email.com" autocomplete="off"/>
+        <button class="btn btn-go" id="btnBuscar" onclick="buscar()">Consultar inscrição</button>
+        <div class="msg" id="msgForm"></div>
+      </div>
+    </div>
+
+    <div id="tela-resultado">
+      <div class="res-top">
+        <p class="saudacao">Olá, <span id="rNome"></span>!</p>
+        <p class="hint" id="rSub">Guarde ou imprima seu comprovante de inscrição e apresente o QR Code na entrada.</p>
+      </div>
+      <div id="listaSessoes"></div>
+      <button class="btn-print" onclick="window.print()"><svg viewBox="0 0 24 24"><path d="M6 9V2h12v7M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2M6 14h12v8H6z"/></svg>Imprimir comprovante</button>
+      <button class="btn btn-ghost" onclick="voltar()">Consultar outro</button>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="fmark">Educar para COMviver</div>
+    <div>Congresso da Rede Municipal de Ensino · <b>21 de julho de 2026</b></div>
+    <div style="margin-top:8px;color:#9fb0c4">Secretaria Municipal de Educação · Ribeirão Preto</div>
+    <div style="margin-top:14px"><a href="fiscal.html" style="color:#cdd6e2;text-decoration:underline">Acesso do fiscal (login e validação)</a></div>
+  </div>
+</footer>
+
+<script>
+  // SUPA_URL / SUPA_KEY / SUPA_SCHEMA definidos em config.js
+  var BASE_VALIDACAO = "https://smedigital.com.br/congresso/validar.html";
+
+  function supaHeaders() {
+    return { "apikey": SUPA_KEY, "Authorization": "Bearer " + SUPA_KEY, "Content-Type": "application/json", "Accept-Profile": SUPA_SCHEMA, "Content-Profile": SUPA_SCHEMA };
+  }
+  function qrImgUrl(token) {
+    var alvo = BASE_VALIDACAO + "?t=" + encodeURIComponent(token);
+    return "https://quickchart.io/qr?size=300&margin=1&ecLevel=M&text=" + encodeURIComponent(alvo);
+  }
+
+  // ---------- PROGRAMAÇÃO ----------
+  var PROGRAMA = [
+    {t:"Ribeirão Preto: o preto do seu povo, o preto do café", p:"Dagoberto José Fonseca", l:"Centro Universitário Barão de Mauá", h:["Manhã 08h","Tarde 14h"]},
+    {t:"Educação Alimentar e Nutricional e Seletividade Alimentar nas Escolas", p:"Maria Fernanda Laus, Joyce Silva Moraes e Bruna Squassoni", l:"Estácio — Anfiteatro", h:["Manhã 08h","Tarde 14h"]},
+    {t:"Alfabetização em discurso: sentidos para ler e escrever com a literatura infantil", p:"Soraya Maria Romano Pacífico", l:"Estácio — Teatro", h:["Manhã 08h","Tarde 14h"]},
+    {t:"Infância, atividade física e tecnologia: desafios do terceiro milênio", p:"Hugo Tourinho", l:"Centro Universitário Moura Lacerda", h:["Manhã 08h","Tarde 14h"]},
+    {t:"Além das Telas: BNCC Computação na Educação Infantil e nos Anos Iniciais", p:"Vivian Caroline Coraucci", l:"UNAERP — Teatro Bassano Vaccarini", h:["Manhã 08h","Tarde 14h"]},
+    {t:"Muito além do conteúdo: o professor da EJA diante das histórias de vida", p:"Erika Osakabe", l:"UNAERP — Sala 06H", h:["Noite 19h"]},
+    {t:"Criando Pontes no Educar para COMviver", p:"Margherita Midea Cuccovia, Andresa Andrade e Amanda Correa", l:"UNIP", h:["Manhã 08h","Tarde 14h"]},
+    {t:"Gestão democrática e qualidade na Educação Infantil", p:"Bianca Correa", l:"SENAI", h:["Manhã 08h","Tarde 14h"]},
+    {t:"Quem brinca escolhe, quem ensina planeja: a intencionalidade no cotidiano da infância", p:"Tatiana Noronha", l:"SESI", h:["Manhã 08h","Tarde 14h"]},
+    {t:"Educar para conviver: saúde mental, tecnologias e os desafios da prática docente", p:"Profª Drª Fabiana Maris Versuti", l:"USP — Auditório (Faculdade de Direito)", h:["Manhã 08h","Tarde 14h"]},
+    {t:"Diálogos entre o Direito e a Educação: contribuições jurídicas para uma gestão escolar inclusiva", p:"Fredson Sado Oliveira Carneiro e Isadora Andrea Santos", l:"USP — Anfiteatro (FEA)", h:["Manhã 08h","Tarde 14h"]},
+    {t:"Da memória ao futuro: pertencimento e identidade na formação da cidadania", p:"José Antonio Correa Lages", l:"Auditório Meira Junior", h:["Manhã 08h","Tarde 14h"]},
+    {t:"A Mochila do Educador: nossas memórias como ponte para o pertencimento", p:"Ana Paula Silveira", l:"Teatro Municipal", h:["Manhã 08h","Tarde 14h"]}
+  ];
+  // Palestrantes por palestra (sufixo _M/_T/_N removido) — para o ingresso e a programação.
+  var PALESTRANTES = {
+    "MOCHILA":"Ana Paula Silveira","ALFABETIZACAO":"Soraya Maria Romano Pacifico",
+    "ALEM_TELAS":"Vivian Caroline Coraucci","CRIANDO_PONTES":"Dra Margherita Midea Cuccovia, Andresa Andrade e Amanda Correa",
+    "DA_MEMORIA":"Jose Antonio Correa Lages","EDUCAR_CONVIVER":"Profa. Dra. Fabiana Maris Versuti",
+    "EDUC_ALIMENTAR":"Maria Fernanda Laus, Joyce Silva Moraes e Bruna Squassoni","GESTAO_DEMOCRATICA":"Bianca Correa",
+    "INFANCIA_ATIVIDADE":"Hugo Tourinho","EJA":"Erika Osakabe","PRETO_CAFE":"Dagoberto Jose Fonseca","QUEM_BRINCA":"Tatiana Noronha",
+    "DIALOGOS_DIREITO":"Fredson Sado Oliveira Carneiro e Isadora Andrea Santos"
+  };
+  function palestranteDe(id){ return PALESTRANTES[String(id||"").replace(/_(M|T|N)\d*$/,"")] || ""; }
+
+  // A programação carrega do Supabase (fonte da verdade: presenca.palestras).
+  // A lista fixa PROGRAMA acima fica só como fallback se a rede falhar.
+  function renderPrograma(lista){
+    var g=document.getElementById("gridPrograma"), html="";
+    lista.forEach(function(x){
+      html+='<div class="pcard"><h3>'+escapeHtml(x.t)+'</h3>'+
+        (x.p?'<div class="pal">'+escapeHtml(x.p)+'</div>':'')+
+        '<div class="loc"><svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 12-9 12s-9-5-9-12a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>'+escapeHtml(x.l)+'</div>'+
+        '<div class="times">'+x.h.map(function(h){return '<span class="time">'+escapeHtml(h)+'</span>';}).join("")+'</div></div>';
+    });
+    g.innerHTML=html;
+  }
+  (function(){
+    fetch(SUPA_URL + "/palestras?select=id,nome,local,periodo,hora&order=nome,periodo", { headers: supaHeaders() })
+      .then(function(r){ if(!r.ok) throw new Error("http"); return r.json(); })
+      .then(function(data){
+        if (!Array.isArray(data) || data.length===0) throw new Error("vazio");
+        // Agrupa as sessões (manhã/tarde/noite) da mesma palestra
+        var ordem={"Manhã":1,"Tarde":2,"Noite":3};
+        var grupos={}, chaves=[];
+        data.forEach(function(s){
+          var base=String(s.id||"").replace(/_(M|T|N)\d*$/,"");
+          if(!grupos[base]){ grupos[base]={t:s.nome||base, sessoes:[]}; chaves.push(base); }
+          grupos[base].sessoes.push(s);
+        });
+        var lista=chaves.map(function(k){
+          var gpo=grupos[k];
+          gpo.sessoes.sort(function(a,b){ return (ordem[periodoCurto(a.periodo)]||9)-(ordem[periodoCurto(b.periodo)]||9); });
+          var locais=[]; gpo.sessoes.forEach(function(s){ if(s.local && locais.indexOf(s.local)===-1) locais.push(s.local); });
+          var l = locais.length<=1
+            ? (locais[0]||"-")
+            : gpo.sessoes.map(function(s){ return (s.local||"-")+" ("+periodoCurto(s.periodo).toLowerCase()+")"; }).join(" · ");
+          var h = gpo.sessoes.map(function(s){
+            var per=periodoCurto(s.periodo)||"Sessão";
+            var hr=(s.hora||"").replace(/:00$/,"h").replace(":",""); if(hr && !/h$/.test(hr)) hr+="h";
+            return per+(hr?" "+hr:"");
+          });
+          return { t:gpo.t.replace(/\.$/,""), p:palestranteDe(k), l:l, h:h };
+        }).sort(function(a,b){ return a.t.localeCompare(b.t,"pt"); });
+        renderPrograma(lista);
+      })
+      .catch(function(){ renderPrograma(PROGRAMA); });
+  })();
+
+  // ---------- CONSULTA ----------
+  function buscar() {
+    var valor = document.getElementById("inputBusca").value.trim();
+    var msg = document.getElementById("msgForm"), btn = document.getElementById("btnBuscar");
+    if (!valor) { msg.className="msg erro"; msg.innerHTML="Informe seu código funcional ou e-mail."; return; }
+    btn.disabled=true; btn.textContent="Consultando...";
+    msg.className="msg info"; msg.innerHTML="Buscando sua inscrição...";
+    fetch(SUPA_URL + "/rpc/consultar_inscricao_busca", { method:"POST", headers:supaHeaders(), body:JSON.stringify({ p_busca: valor }) })
+    .then(function(r){ if(!r.ok) throw new Error("rpc"); return r.json(); })
+    .then(function(data){ finalizar(data, btn, msg); })
+    .catch(function(){ buscarLegado(valor, btn, msg); });
+  }
+  function buscarLegado(valor, btn, msg) {
+    var v = encodeURIComponent(valor);
+    var url = SUPA_URL + "/participantes?or=(email.ilike." + v + ",codigo_funcional.eq." + v + ")" +
+              "&select=token,nome,email,palestra_id,palestras(nome,local,endereco,periodo,hora)";
+    fetch(url, { headers: supaHeaders() })
+    .then(function(r){ return r.json(); })
+    .then(function(data){
+      if (Array.isArray(data)) data = data.map(function(p){ var pl=p.palestras||{}; return { token:p.token,nome:p.nome,email:p.email,palestra_id:p.palestra_id,palestra_nome:pl.nome,local:pl.local,endereco:pl.endereco,periodo:pl.periodo,hora:pl.hora }; });
+      finalizar(Array.isArray(data)?data:[], btn, msg);
+    })
+    .catch(function(){ btn.disabled=false; btn.textContent="Consultar inscrição"; msg.className="msg erro"; msg.innerHTML="Erro de comunicação. Tente novamente."; });
+  }
+  function finalizar(data, btn, msg) {
+    btn.disabled=false; btn.textContent="Consultar inscrição";
+    if (!Array.isArray(data) || data.length===0) { msg.className="msg erro"; msg.innerHTML="Inscrição não encontrada. Verifique o código funcional ou e-mail informado."; return; }
+    msg.className="msg";
+    var tokens = data.map(function(p){ return p.token; }).filter(Boolean);
+    carregarPresencas(tokens).then(function(mapPres){
+      data.forEach(function(p){ var pr=mapPres[p.token]; p.presente=!!pr; p.data_presenca=pr?pr.data_hora:null; });
+      mostrarResultado(data);
+    });
+  }
+
+  // Presenças já registradas para os tokens consultados (a chave anon lê presencas).
+  function carregarPresencas(tokens){
+    if (!tokens.length) return Promise.resolve({});
+    var inList = tokens.map(function(t){ return '"'+String(t).replace(/"/g,"")+'"'; }).join(",");
+    var url = SUPA_URL + "/presencas?select=token,data_hora&token=in.(" + encodeURIComponent(inList) + ")";
+    return fetch(url, { headers: supaHeaders() })
+      .then(function(r){ return r.ok ? r.json() : []; })
+      .then(function(arr){ var m={}; if(Array.isArray(arr)) arr.forEach(function(x){ m[x.token]=x; }); return m; })
+      .catch(function(){ return {}; });
+  }
+
+  function mostrarResultado(rows) {
+    document.getElementById("rNome").textContent = rows[0].nome || "";
+    var estados = rows.map(estadoSessao);
+    var soParticipacao = estados.every(function(e){ return e==="participacao"; });
+    var algumPresente  = estados.some(function(e){ return e!=="inscricao"; });
+    document.getElementById("rSub").textContent =
+      soParticipacao ? "Presença confirmada. Baixe ou imprima seu comprovante de participação."
+      : algumPresente ? "Acompanhe abaixo a situação de cada palestra."
+      : (rows.length > 1
+          ? "Você tem " + rows.length + " inscrições. Guarde/imprima o comprovante de cada palestra."
+          : "Guarde ou imprima seu comprovante de inscrição e apresente o QR Code na entrada.");
+
+    var lista = document.getElementById("listaSessoes"); lista.innerHTML = "";
+    rows.forEach(function(p) {
+      var estado = estadoSessao(p);
+      var per=nomePeriodo(p.periodo,p.palestra_id), hora=p.hora||horaDoId(p.palestra_id), pal=palestranteDe(p.palestra_id);
+      var t = document.createElement("div"); t.className="ingresso";
+
+      var subLabel = estado==="participacao" ? "Comprovante de participa&ccedil;&atilde;o"
+                   : estado==="andamento"    ? "Presen&ccedil;a em valida&ccedil;&atilde;o"
+                   : "Credencial de acesso";
+
+      var cabecalho =
+        '<div class="ing-head"><div class="ing-evento">Congresso da Rede Municipal de Ensino &middot; 21/07/2026</div><div class="ing-tema">Educar para COMviver &mdash; Ribeir&atilde;o 170 anos</div></div>'+
+        '<div class="ing-nome">'+escapeHtml(p.nome||"")+'</div><div class="ing-sub">'+subLabel+'</div>'+
+        (estado==="participacao"
+          ? '<div class="ing-selo"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="#1b6e3a" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>Presen&ccedil;a confirmada</div>'
+          : "");
+
+      var corpo =
+        '<div class="ing-body"><div class="ing-palestra">'+escapeHtml(p.palestra_nome||p.palestra_id)+'</div>'+
+          (pal?'<div class="ing-palestrante">com '+escapeHtml(pal)+'</div>':'')+
+          '<div class="ing-grid"><div class="ing-info"><div class="k">Data</div><div class="v">21/07</div></div>'+
+          '<div class="ing-info"><div class="k">Hor&aacute;rio</div><div class="v">'+escapeHtml(hora)+'</div></div>'+
+          '<div class="ing-info"><div class="k">Per&iacute;odo</div><div class="v">'+escapeHtml(per)+'</div></div></div>'+
+          '<div class="ing-local"><strong>'+escapeHtml(p.local||"-")+'</strong>'+(p.endereco?'<br><span class="end">'+escapeHtml(p.endereco)+'</span>':'')+'</div></div>';
+
+      if (estado === "inscricao") {
+        var alvo = BASE_VALIDACAO + "?t=" + encodeURIComponent(p.token);
+        t.innerHTML = cabecalho + corpo +
+          '<div class="ing-divider"></div>'+
+          '<div class="ing-qr"><img class="ing-qrimg" alt="QR Code"><div class="ing-token">'+escapeHtml(p.token)+'</div><div class="ing-foot">Apresente este QR Code na entrada</div></div>';
+        var b1=document.createElement("button"); b1.className="btn-baixar-ing";
+        b1.innerHTML='<svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Baixar comprovante de inscrição';
+        b1.onclick=function(){ baixarIngresso(t, p.token, "comprovante_"); };
+        lista.appendChild(t); lista.appendChild(b1);
+        var imgEl=t.querySelector(".ing-qrimg");
+        if (window.QRCode && QRCode.toDataURL) QRCode.toDataURL(alvo,{width:300,margin:1,errorCorrectionLevel:"M"},function(e,u){ imgEl.src=e?qrImgUrl(p.token):u; });
+        else imgEl.src=qrImgUrl(p.token);
+
+      } else if (estado === "andamento") {
+        t.innerHTML = cabecalho + corpo +
+          '<div class="ing-status andamento"><span class="pulso"></span><div>'+
+            '<strong>Palestra em andamento</strong>'+
+            'Sua presen&ccedil;a foi registrada'+(horaValidacao(p)?' &agrave;s '+horaValidacao(p):'')+' e est&aacute; sendo validada durante o evento. '+
+            'O comprovante de participa&ccedil;&atilde;o ficar&aacute; dispon&iacute;vel aqui ao t&eacute;rmino da palestra.'+
+          '</div></div>';
+        lista.appendChild(t);
+
+      } else { // participacao
+        t.innerHTML = cabecalho + corpo +
+          '<div class="ing-status participacao"><svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><path d="M22 4L12 14.01l-3-3"/></svg><div>'+
+            '<strong>Comprovante de participa&ccedil;&atilde;o</strong>'+
+            'Confirmamos a participa&ccedil;&atilde;o de <strong style="display:inline">'+escapeHtml(p.nome||"")+'</strong> na palestra acima, realizada em 21/07/2026'+
+            (horaValidacao(p)?', com presen&ccedil;a validada &agrave;s '+horaValidacao(p):'')+'.'+
+          '</div></div>';
+        var b2=document.createElement("button"); b2.className="btn-baixar-ing";
+        b2.innerHTML='<svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Baixar comprovante de participação';
+        b2.onclick=function(){ baixarIngresso(t, p.token, "participacao_"); };
+        lista.appendChild(t); lista.appendChild(b2);
+      }
+    });
+    document.getElementById("tela-form").style.display="none";
+    document.getElementById("tela-resultado").style.display="block";
+  }
+
+  function baixarIngresso(el, token, prefixo) {
+    if (typeof html2canvas !== "function") { window.print(); return; }
+    html2canvas(el, { backgroundColor:"#ffffff", scale:2, useCORS:true }).then(function(canvas){
+      canvas.toBlob(function(blob){
+        if (!blob) { window.print(); return; }
+        var a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download=(prefixo||"comprovante_")+token+".png";
+        document.body.appendChild(a); a.click(); a.remove(); setTimeout(function(){ URL.revokeObjectURL(a.href); },1500);
+      });
+    }).catch(function(){ window.print(); });
+  }
+
+  function nomePeriodo(periodo, id){ if(periodo) return periodo; if(/_M\d*$/.test(id||""))return "Manhã"; if(/_T\d*$/.test(id||""))return "Tarde"; if(/_N\d*$/.test(id||""))return "Noite"; return "Sessão"; }
+  function horaDoId(id){ if(/_M\d*$/.test(id||""))return "08:00"; if(/_T\d*$/.test(id||""))return "14:00"; if(/_N\d*$/.test(id||""))return "19:00"; return ""; }
+
+  // Estado da sessão: inscricao (sem presença) / andamento (presente, dentro das 4h) / participacao (após 4h)
+  var EVT_ANO=2026, EVT_MES=6, EVT_DIA=21;      // 21/07/2026 (mês 0-based)
+  var DURACAO_MS=4*60*60*1000;                  // palestra dura 4 horas
+  function inicioSessao(p){
+    var hm=(p.hora||horaDoId(p.palestra_id)||"08:00").split(":");
+    return new Date(EVT_ANO,EVT_MES,EVT_DIA,parseInt(hm[0],10)||0,parseInt(hm[1],10)||0,0,0);
+  }
+  function estadoSessao(p){
+    if(!p.presente) return "inscricao";
+    return (Date.now() < inicioSessao(p).getTime()+DURACAO_MS) ? "andamento" : "participacao";
+  }
+  function horaValidacao(p){
+    if(!p.data_presenca) return "";
+    try{ var d=new Date(p.data_presenca); return ("0"+d.getHours()).slice(-2)+":"+("0"+d.getMinutes()).slice(-2); }catch(e){ return ""; }
+  }
+  function voltar(){ document.getElementById("tela-resultado").style.display="none"; document.getElementById("tela-form").style.display="block"; document.getElementById("inputBusca").value=""; document.getElementById("msgForm").className="msg"; }
+  document.getElementById("inputBusca").addEventListener("keydown", function(e){ if(e.key==="Enter") buscar(); });
+</script>
+</body>
+</html>
